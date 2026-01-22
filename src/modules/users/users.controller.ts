@@ -33,7 +33,7 @@ import { UserRole } from 'generated/prisma/enums';
 import { Public } from '@/common/decorators/public.decorator';
 @ApiTags('Users')
 @ApiBearerAuth('JWT-auth')
-@Controller({ path: 'users', version: '1' })
+@Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

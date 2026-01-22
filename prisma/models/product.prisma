@@ -1,0 +1,62 @@
+model Product {
+  id           String   @id @default(uuid())
+  categoryId   String   @map("category_id")
+  brandId      String?  @map("brand_id")
+  name         String   @db.VarChar(255)
+  slug         String   @unique @db.VarChar(255)
+  description  String   @db.Text
+  keyFeatures  Json?    @map("key_features")
+  specifications Json?
+  basePrice      Decimal  @map("base_price") @db.Decimal(15, 2)
+  isNew          Boolean  @default(false) @map("is_new")
+  isActive       Boolean  @default(true) @map("is_active")
+  warrantyInfo   String?  @map("warranty_info") @db.VarChar(255)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  category   Category        @relation(fields: [categoryId], references: [id])
+  brand      Brand?          @relation(fields: [brandId], references: [id])
+
+  variants   ProductVariant[]
+  images     ProductImage[]
+
+  @@index([brandId])
+  @@index([categoryId])
+  @@map("products")
+}
+
+model ProductVariant {
+  id            String      @id @default(uuid())
+  productId     String      @map("product_id")
+  sku           String   @unique @db.VarChar(100)
+  name          String?  @db.VarChar(100)
+  attributes    Json     // { "color": "Cosmic Orange", "colorHex": "#FF6B00", "storage": "512GB" }
+  price         Decimal  @db.Decimal(15, 2)
+  stockQuantity Int      @default(0) @map("stock_quantity")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  product Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  images  ProductImage[]
+
+  @@index([productId])
+  @@map("product_variants")
+}
+
+model ProductImage {
+  id        String      @id @default(uuid())
+  productId String      @map("product_id")
+  variantId String?     @map("variant_id")
+  imageUrl  String   @map("image_url") @db.VarChar(500)
+  sortOrder Int      @default(0) @map("sort_order")
+  isPrimary Boolean  @default(false) @map("is_primary")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  product Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
+  @@index([productId])
+  @@map("product_images")
+}
