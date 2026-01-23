@@ -7,11 +7,13 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
+import { ApiTags, ApiParam } from '@nestjs/swagger';
 import { BrandsService } from './brands.service';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
 import { Public } from '@/common/decorators/public.decorator';
 
+@ApiTags('Brands')
 @Controller('brands')
 export class BrandsController {
   constructor(private readonly brandsService: BrandsService) {}
@@ -23,6 +25,8 @@ export class BrandsController {
 
   @Get()
   @Public()
+  @ApiParam({ name: 'page', example: 1 })
+  @ApiParam({ name: 'limit', example: 10 })
   findAll(@Param('page') page: number, @Param('limit') limit: number) {
     return this.brandsService.findAll(page, limit);
   }
