@@ -2,7 +2,7 @@ import { IRepository } from '@/shared/repositories';
 import { Category } from 'generated/prisma/browser';
 
 /**
- * Brand-specific repository interface
+ * Category-specific repository interface
  * Extends generic IRepository and adds domain-specific methods
  */
 export interface ICategoriesRepository extends IRepository<Category> {
