@@ -6,8 +6,9 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
-import { ApiTags, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiQuery } from '@nestjs/swagger';
 import { BrandsService } from './brands.service';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
@@ -25,10 +26,10 @@ export class BrandsController {
 
   @Get()
   @Public()
-  @ApiParam({ name: 'page', example: 1 })
-  @ApiParam({ name: 'limit', example: 10 })
-  findAll(@Param('page') page: number, @Param('limit') limit: number) {
-    return this.brandsService.findAll(page, limit);
+  @ApiQuery({ name: 'page', example: 1, required: false })
+  @ApiQuery({ name: 'limit', example: 10, required: false })
+  findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
+    return this.brandsService.findAll(+(page ?? 1), +(limit ?? 10));
   }
 
   @Get(':id')
