@@ -27,6 +27,7 @@ export type ModelName = Prisma.ModelName;
 export interface FindAllParams {
   skip?: number;
   take?: number;
+  cursor?: { id: string };
   where?: unknown;
   orderBy?: unknown;
   include?: unknown;

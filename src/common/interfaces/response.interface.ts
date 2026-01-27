@@ -10,6 +10,7 @@ export interface ResponseMeta {
   path: string;
   requestId: string;
   pagination?: PaginationMeta;
+  cursorPagination?: CursorPaginationMeta;
 }
 
 export interface PaginationMeta {
@@ -21,11 +22,26 @@ export interface PaginationMeta {
   hasPrev: boolean;
 }
 
+export interface CursorPaginationMeta {
+  limit: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+  nextCursor: string | null;
+  prevCursor: string | null;
+}
+
 export interface PaginationResult<T> {
   items: T[];
   page: number;
   limit: number;
   total: number;
+}
+
+export interface CursorPaginationResult<T> {
+  items: T[];
+  limit: number;
+  nextCursor: string | null;
+  prevCursor: string | null;
 }
 
 export interface ErrorResponse {

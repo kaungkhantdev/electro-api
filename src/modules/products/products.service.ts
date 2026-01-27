@@ -16,8 +16,38 @@ export class ProductsService {
     return this.productsRepository.create(createProductDto);
   }
 
-  findAll() {
-    return this.productsRepository.findAll();
+  // async findAll(page: number, limit: number) {
+  //   const skip = (page - 1) * limit;
+  //   const [products, total] = await Promise.all([
+  //     this.productsRepository.findAll({ skip, take: limit }),
+  //     this.productsRepository.count(),
+  //   ]);
+
+  //   return {
+  //     items: products,
+  //     page,
+  //     limit,
+  //     total,
+  //   };
+  // }
+
+  // cursor based pagination
+  async findAll(cursor?: string, limit: number = 10) {
+    const products = await this.productsRepository.findAll({
+      take: limit + 1,
+      ...(cursor && { cursor: { id: cursor }, skip: 1 }),
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const hasNextPage = products.length > limit;
+    const items = hasNextPage ? products.slice(0, -1) : products;
+
+    return {
+      items,
+      limit,
+      nextCursor: hasNextPage ? items[items.length - 1]?.id : null,
+      prevCursor: cursor ?? null, // the cursor we received is our "prev"
+    };
   }
 
   findOne(id: string) {
