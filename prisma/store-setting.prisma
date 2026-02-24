@@ -1,0 +1,33 @@
+model StoreSetting {
+  id         String  @id @default(uuid())
+  storeName  String  @map("store_name")
+  storeEmail String  @map("store_email")
+  storePhone String? @map("store_phone")
+  currency   String  @default("USD")
+  timezone   String  @default("America/New_York")
+
+  // Contact Info
+  address String?
+  city    String?
+  state   String?
+  zipCode String? @map("zip_code")
+  country String?
+
+  // SEO
+  metaTitle       String? @map("meta_title")
+  metaDescription String? @map("meta_description") @db.Text
+
+  // Social
+  facebook  String?
+  instagram String?
+  twitter   String?
+
+  // Tax Settings
+  taxRate    Decimal? @map("tax_rate") @db.Decimal(5, 2)
+  taxEnabled Boolean  @default(false) @map("tax_enabled")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("store_settings")
+}

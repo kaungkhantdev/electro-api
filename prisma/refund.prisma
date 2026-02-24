@@ -1,0 +1,21 @@
+model Refund {
+  id      String       @id @default(uuid())
+  orderId String       @map("order_id")
+  amount  Decimal      @db.Decimal(10, 2)
+  reason  String?      @db.Text
+  status  RefundStatus @default(PENDING)
+
+  refundedAt DateTime? @map("refunded_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("refunds")
+}
+
+enum RefundStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}

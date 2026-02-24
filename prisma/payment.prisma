@@ -1,0 +1,12 @@
+model PaymentMethod {
+  id       String  @id @default(uuid())
+  name     String
+  provider String // stripe, paypal, apple_pay, etc.
+  isActive Boolean @default(true) @map("is_active")
+  config   Json? // Store API keys, etc. (encrypt in production!)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("payment_methods")
+}
