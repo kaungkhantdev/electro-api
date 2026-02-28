@@ -3,7 +3,6 @@ model Category {
   name        String
   slug        String  @unique
   description String? @db.Text
-  image       String?
   icon        String?
   parentId    String? @map("parent_id")
   position    Int     @default(0)
@@ -38,12 +37,6 @@ model Product {
   lowStockThreshold Int?    @default(10) @map("low_stock_threshold")
   trackInventory    Boolean @default(true) @map("track_inventory")
   allowBackorder    Boolean @default(false) @map("allow_backorder")
-
-  // Product Details
-  weight Decimal? @db.Decimal(10, 2)
-  width  Decimal? @db.Decimal(10, 2)
-  height Decimal? @db.Decimal(10, 2)
-  length Decimal? @db.Decimal(10, 2)
 
   // Organization
   categoryId String?  @map("category_id")
@@ -99,14 +92,6 @@ model ProductVariant {
   comparePrice Decimal? @map("compare_price") @db.Decimal(10, 2)
   stock        Int      @default(0)
 
-  // Variant Options (e.g., Color: "Blue", Size: "Large")
-  option1Name  String? @map("option1_name")
-  option1Value String? @map("option1_value")
-  option2Name  String? @map("option2_name")
-  option2Value String? @map("option2_value")
-  option3Name  String? @map("option3_name")
-  option3Value String? @map("option3_value")
-
   image    String?
   isActive Boolean @default(true) @map("is_active")
 
@@ -114,8 +99,23 @@ model ProductVariant {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  options ProductVariantOption[]
 
   @@map("product_variants")
+}
+
+model ProductVariantOption {
+  id           String   @id @default(uuid())
+  variantId    String   @map("variant_id")
+  optionName   String   @map("option_name")
+  optionValue  String   @map("option_value")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@map("product_variant_options")
 }
 
 enum ProductStatus {

@@ -11,6 +11,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ProductsModule } from './modules/products/products.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { AppService } from './app.service';
     UsersModule,
     AuthModule,
     StorageModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [
