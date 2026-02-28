@@ -20,7 +20,7 @@ model Order {
   fulfillmentStatus FulfillmentStatus @default(UNFULFILLED) @map("fulfillment_status")
 
   // Shipping
-  shippingMethod String? @map("shipping_method")
+  shippingMethod ShippingMethod @map("shipping_method") @default(STANDARD)
   trackingNumber String? @map("tracking_number")
   carrier        String?
 
@@ -85,4 +85,10 @@ enum FulfillmentStatus {
   PARTIALLY_FULFILLED
   FULFILLED
   RETURNED
+}
+
+enum ShippingMethod {
+  STANDARD
+  EXPRESS
+  OVERNIGHT
 }
