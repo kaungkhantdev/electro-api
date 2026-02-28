@@ -8,5 +8,74 @@ model PaymentMethod {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  payments    Payment[]
+  refunds     Refund[]
+  paymentLogs PaymentLog[]
+
   @@map("payment_methods")
+}
+
+model Payment {
+  id          String  @id @default(uuid())
+  orderId     String  @map("order_id")
+  amount      Decimal @db.Decimal(10, 2)
+  currency    String  @default("USD")
+  status      PaymentStatus
+  provider    String
+  transactionId String? @map("transaction_id")
+  paymentMethodId String? @map("payment_method_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  paymentMethod PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+
+  @@map("payments")
+}
+
+model Refund {
+  id          String  @id @default(uuid())
+  orderId     String  @map("order_id")
+  amount      Decimal @db.Decimal(10, 2)
+  currency    String  @default("USD")
+  status      PaymentStatus
+  provider    String
+  transactionId String? @map("transaction_id")
+  paymentMethodId String? @map("payment_method_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  paymentMethod PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+
+  @@map("refunds")
+}
+
+model PaymentLog {
+  id          String  @id @default(uuid())
+  orderId     String  @map("order_id")
+  amount      Decimal @db.Decimal(10, 2)
+  currency    String  @default("USD")
+  status      PaymentStatus
+  provider    String
+  transactionId String? @map("transaction_id")
+  paymentMethodId String? @map("payment_method_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  paymentMethod PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+
+  @@map("payment_logs")
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
 }

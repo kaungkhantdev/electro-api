@@ -2,7 +2,9 @@ import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ProductService } from './products.service';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { Public } from '@/common/decorators/public.decorator';
 
+@Public()
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productService: ProductService) {}

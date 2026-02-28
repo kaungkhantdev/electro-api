@@ -19,10 +19,6 @@ model Order {
   paymentStatus     PaymentStatus     @default(PENDING) @map("payment_status")
   fulfillmentStatus FulfillmentStatus @default(UNFULFILLED) @map("fulfillment_status")
 
-  // Payment
-  paymentMethod   String? @map("payment_method")
-  paymentIntentId String? @map("payment_intent_id") // Stripe/PayPal payment ID
-
   // Shipping
   shippingMethod String? @map("shipping_method")
   trackingNumber String? @map("tracking_number")
@@ -48,7 +44,9 @@ model Order {
   shippingAddress Address?      @relation("ShippingAddress", fields: [shippingAddressId], references: [id])
   billingAddress  Address?      @relation("BillingAddress", fields: [billingAddressId], references: [id])
   items           OrderItem[]
+  payments        Payment[]
   refunds         Refund[]
+  paymentLogs     PaymentLog[]
   couponUsages    CouponUsage[]
 
   @@map("orders")
@@ -80,14 +78,6 @@ enum OrderStatus {
   DELIVERED
   CANCELLED
   REFUNDED
-}
-
-enum PaymentStatus {
-  PENDING
-  PAID
-  FAILED
-  REFUNDED
-  PARTIALLY_REFUNDED
 }
 
 enum FulfillmentStatus {
