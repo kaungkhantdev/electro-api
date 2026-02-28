@@ -28,8 +28,8 @@ model Payment {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  paymentMethod PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+  order         Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  paymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
 
   @@map("payments")
 }
@@ -47,8 +47,8 @@ model Refund {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  paymentMethod PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+  order         Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  paymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
 
   @@map("refunds")
 }
@@ -66,8 +66,8 @@ model PaymentLog {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  paymentMethod PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+  order         Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  paymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
 
   @@map("payment_logs")
 }
