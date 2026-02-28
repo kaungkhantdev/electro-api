@@ -45,7 +45,25 @@ export class CreateUserDto {
   lastName: string;
 }
 
-export class UpdateUserDto {
+export class UpdateUserRoleDto {
+  @ApiProperty({
+    description: 'User role',
+    example: 'ADMIN',
+  })
+  @IsString()
+  role: string;
+}
+
+export class UpdateUserStatusDto {
+  @ApiProperty({
+    description: 'User status',
+    example: 'ACTIVE',
+  })
+  @IsString()
+  status: string;
+}
+
+export class UpdateUserProfileDto {
   @ApiPropertyOptional({
     description: 'User first name',
     example: 'Jane',
@@ -61,13 +79,14 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   lastName?: string;
+}
 
-  @ApiPropertyOptional({
-    description: 'New password',
-    example: 'NewSecurePass123!',
+export class UpdateUserPasswordDto {
+  @ApiProperty({
+    description: 'User password',
+    example: 'SecurePass123!',
     minLength: 6,
   })
-  @IsOptional()
   @IsString()
   @MinLength(8)
   @MaxLength(128)
@@ -75,5 +94,27 @@ export class UpdateUserDto {
     message:
       'password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&._-#)',
   })
-  password?: string;
+  password: string;
+
+  @ApiProperty({
+    description: 'User password confirmation',
+    example: 'SecurePass123!',
+    minLength: 6,
+  })
+  @IsString()
+  @MinLength(8)
+  @MaxLength(128)
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._\-#])/, {
+    message:
+      'password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&._-#)',
+  })
+  passwordConfirmation: string;
+
+  @ApiProperty({
+    description: 'User current password',
+    example: 'SecurePass123!',
+    minLength: 6,
+  })
+  @IsString()
+  currentPassword: string;
 }
