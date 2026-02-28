@@ -10,7 +10,7 @@ model PaymentMethod {
 
   payments    Payment[]
   refunds     Refund[]
-  paymentLogs PaymentLog[]
+  paymentAuditLogs PaymentAuditLog[]
 
   @@map("payment_methods")
 }
@@ -30,13 +30,15 @@ model Payment {
 
   order         Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
   paymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
+  refunds       Refund[]
 
   @@map("payments")
 }
 
-model Refund {
+model PaymentAuditLog {
   id          String  @id @default(uuid())
   orderId     String  @map("order_id")
+  action      PaymentAuditAction // What happened
   amount      Decimal @db.Decimal(10, 2)
   currency    String  @default("USD")
   status      PaymentStatus
@@ -44,32 +46,18 @@ model Refund {
   transactionId String? @map("transaction_id")
   paymentMethodId String? @map("payment_method_id")
 
+  // Audit metadata
+  actorId     String? @map("actor_id") // User or system that triggered this
+  actorType   String? @map("actor_type") // "USER", "SYSTEM", "WEBHOOK"
+  metadata    Json? // Additional context about the action
+
   createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  // No updatedAt - audit logs are immutable
 
   order         Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
   paymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
 
-  @@map("refunds")
-}
-
-model PaymentLog {
-  id          String  @id @default(uuid())
-  orderId     String  @map("order_id")
-  amount      Decimal @db.Decimal(10, 2)
-  currency    String  @default("USD")
-  status      PaymentStatus
-  provider    String
-  transactionId String? @map("transaction_id")
-  paymentMethodId String? @map("payment_method_id")
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  order         Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  paymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
-
-  @@map("payment_logs")
+  @@map("payment_audit_logs")
 }
 
 enum PaymentStatus {
@@ -78,4 +66,16 @@ enum PaymentStatus {
   FAILED
   REFUNDED
   PARTIALLY_REFUNDED
+}
+
+enum PaymentAuditAction {
+  PAYMENT_CREATED
+  PAYMENT_UPDATED
+  PAYMENT_COMPLETED
+  PAYMENT_FAILED
+  REFUND_INITIATED
+  REFUND_COMPLETED
+  REFUND_FAILED
+  STATUS_CHANGED
+  WEBHOOK_RECEIVED
 }

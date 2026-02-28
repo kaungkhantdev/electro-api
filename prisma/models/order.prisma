@@ -46,7 +46,7 @@ model Order {
   items           OrderItem[]
   payments        Payment[]
   refunds         Refund[]
-  paymentLogs     PaymentLog[]
+  paymentAuditLogs PaymentAuditLog[]
   couponUsages    CouponUsage[]
 
   @@map("orders")
