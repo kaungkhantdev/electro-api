@@ -1,6 +1,6 @@
 import { IRepository } from '@/common/repository';
 import { OrderItem } from 'generated/prisma/client';
-import { CreateOrderItemDto, UpdateOrderItemDto } from '../dto/orders.dto';
+import { CreateOrderItemDto, UpdateOrderItemDto } from '../dto/order-items.dto';
 
 export interface IOrderItemsRepository extends IRepository<OrderItem> {
   createOrderItem(data: CreateOrderItemDto): Promise<OrderItem>;

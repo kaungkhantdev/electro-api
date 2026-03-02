@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { UsersRepository } from './repositories/users.repository';
-import { UsersController } from './admin.users.controller';
 import { UsersService } from './users.service';
 import { USER_REPOSITORY } from './repositories/users.repository.interface';
+import { AdminUsersController } from './admin.users.controller';
 
 @Module({
-  controllers: [UsersController],
+  controllers: [AdminUsersController],
   providers: [
     UsersService,
     {

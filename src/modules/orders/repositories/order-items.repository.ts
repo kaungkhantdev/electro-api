@@ -4,7 +4,7 @@ import { OrderItem } from 'generated/prisma/client';
 import { IOrderItemsRepository } from './order-items.repository.interface';
 import { PrismaService } from '@/database/prisma.service';
 import { Prisma } from 'generated/prisma/client';
-import { CreateOrderItemDto, UpdateOrderItemDto } from '../dto/orders.dto';
+import { CreateOrderItemDto, UpdateOrderItemDto } from '../dto/order-items.dto';
 
 @Injectable()
 export class OrderItemsRepository
