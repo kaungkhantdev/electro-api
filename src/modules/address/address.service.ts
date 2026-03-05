@@ -37,22 +37,25 @@ export class AddressService {
   }
 
   async getAll(
-    page: number,
+    cursor: string | undefined,
     limit: number,
   ): Promise<PaginatedAddressResponseDto> {
-    const skip = (page - 1) * limit;
-    const [addresses, total] = await Promise.all([
-      this.addressRepository.findAll({ skip, take: limit }),
-      this.addressRepository.count(),
-    ]);
+    const rows = await this.addressRepository.findAll({
+      take: limit + 1,
+      ...(cursor && { skip: 1, cursor: { id: cursor } }),
+    });
+
+    const hasNextPage = rows.length > limit;
+    const items = hasNextPage ? rows.slice(0, limit) : rows;
+    const nextCursor = hasNextPage ? items[items.length - 1].id : null;
 
     return {
-      items: plainToInstance(AddressResponseDto, addresses, {
+      items: plainToInstance(AddressResponseDto, items, {
         excludeExtraneousValues: true,
       }),
-      page,
       limit,
-      total,
+      nextCursor,
+      hasNextPage,
     };
   }
 }

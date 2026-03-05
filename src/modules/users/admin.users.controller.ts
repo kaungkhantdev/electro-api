@@ -22,7 +22,7 @@ import { Roles } from '@/common/decorators/roles.decorator';
 import { RolesGuard } from '@/common/guards/role.guard';
 import { UserRole } from 'generated/prisma/enums';
 import { plainToInstance } from 'class-transformer';
-import { PaginationDto } from '@/common/dto/pagination.dto';
+import { CursorPaginationDto } from '@/common/dto/cursor-pagination.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth('JWT-auth')
@@ -43,8 +43,8 @@ export class AdminUsersController {
   })
   @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
   @ApiForbiddenResponse({ description: 'User does not have ADMIN role' })
-  async findAll(@Query() pagination: PaginationDto) {
-    return await this.usersService.getAll(pagination.page, pagination.limit);
+  async findAll(@Query() pagination: CursorPaginationDto) {
+    return await this.usersService.getAll(pagination.cursor, pagination.limit);
   }
 
   @Get(':id')

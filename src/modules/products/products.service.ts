@@ -195,22 +195,25 @@ export class ProductService {
   }
 
   async getAllProducts(
-    page: number,
+    cursor: string | undefined,
     limit: number,
   ): Promise<PaginatedProductsResponseDto> {
-    const skip = (page - 1) * limit;
-    const [products, total] = await Promise.all([
-      this.productRepository.findAll({ skip, take: limit }),
-      this.productRepository.count(),
-    ]);
+    const rows = await this.productRepository.findAll({
+      take: limit + 1,
+      ...(cursor && { skip: 1, cursor: { id: cursor } }),
+    });
+
+    const hasNextPage = rows.length > limit;
+    const items = hasNextPage ? rows.slice(0, limit) : rows;
+    const nextCursor = hasNextPage ? items[items.length - 1].id : null;
 
     return {
-      items: plainToInstance(ProductResponseDto, products, {
+      items: plainToInstance(ProductResponseDto, items, {
         excludeExtraneousValues: true,
       }),
-      page,
       limit,
-      total,
+      nextCursor,
+      hasNextPage,
     };
   }
 }

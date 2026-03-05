@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { CursorPaginationDto } from 'src/common/dto/cursor-pagination.dto';
 
 @Controller('categories')
 export class CategoryController {
@@ -10,15 +10,15 @@ export class CategoryController {
   @Get()
   @ApiOperation({
     summary: 'Get all categories',
-    description: 'Returns a paginated list of all categories.',
+    description: 'Returns a cursor-paginated list of all categories.',
   })
   @ApiResponse({
     status: 200,
     description: 'Categories list retrieved successfully',
   })
-  async findAll(@Query() pagination: PaginationDto) {
+  async findAll(@Query() pagination: CursorPaginationDto) {
     return await this.categoryService.getAllCategories(
-      pagination.page,
+      pagination.cursor,
       pagination.limit,
     );
   }

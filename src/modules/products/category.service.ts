@@ -49,22 +49,25 @@ export class CategoryService {
   }
 
   async getAllCategories(
-    page: number,
+    cursor: string | undefined,
     limit: number,
   ): Promise<PaginatedCategoriesResponseDto> {
-    const skip = (page - 1) * limit;
-    const [categories, total] = await Promise.all([
-      this.categoryRepository.findAll({ skip, take: limit }),
-      this.categoryRepository.count(),
-    ]);
+    const rows = await this.categoryRepository.findAll({
+      take: limit + 1,
+      ...(cursor && { skip: 1, cursor: { id: cursor } }),
+    });
+
+    const hasNextPage = rows.length > limit;
+    const items = hasNextPage ? rows.slice(0, limit) : rows;
+    const nextCursor = hasNextPage ? items[items.length - 1].id : null;
 
     return {
-      items: plainToInstance(CategoryReponseDto, categories, {
+      items: plainToInstance(CategoryReponseDto, items, {
         excludeExtraneousValues: true,
       }),
-      page,
       limit,
-      total,
+      nextCursor,
+      hasNextPage,
     };
   }
 }

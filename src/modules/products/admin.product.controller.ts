@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { ProductService } from './products.service';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { CursorPaginationDto } from 'src/common/dto/cursor-pagination.dto';
 import { CreateProductDto, UpdateProductDto } from './dto/products.dto';
 import { RolesGuard } from '@/common/guards/role.guard';
 import { UseGuards } from '@nestjs/common';
@@ -32,9 +32,9 @@ export class AdminProductController {
     status: 200,
     description: 'Categories list retrieved successfully',
   })
-  async findAll(@Query() pagination: PaginationDto) {
+  async findAll(@Query() pagination: CursorPaginationDto) {
     return await this.productService.getAllProducts(
-      pagination.page,
+      pagination.cursor,
       pagination.limit,
     );
   }

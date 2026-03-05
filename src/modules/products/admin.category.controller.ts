@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { CursorPaginationDto } from 'src/common/dto/cursor-pagination.dto';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 import { RolesGuard } from '@/common/guards/role.guard';
 import { UseGuards } from '@nestjs/common';
@@ -32,9 +32,9 @@ export class AdminCategoryController {
     status: 200,
     description: 'Categories list retrieved successfully',
   })
-  async findAll(@Query() pagination: PaginationDto) {
+  async findAll(@Query() pagination: CursorPaginationDto) {
     return await this.categoryService.getAllCategories(
-      pagination.page,
+      pagination.cursor,
       pagination.limit,
     );
   }

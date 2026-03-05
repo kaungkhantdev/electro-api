@@ -44,7 +44,6 @@ export class UsersService {
     // Check if exists
     const existing =
       data.email && (await this.usersRepository.findByEmail(data.email));
-    // console.log(existing);
     if (existing) {
       throw new Error('User already exists');
     }
@@ -61,22 +60,25 @@ export class UsersService {
   }
 
   async getAll(
-    page: number,
+    cursor: string | undefined,
     limit: number,
   ): Promise<PaginatedUsersResponseDto> {
-    const skip = (page - 1) * limit;
-    const [users, total] = await Promise.all([
-      this.usersRepository.findAll({ skip, take: limit }),
-      this.usersRepository.count(),
-    ]);
+    const rows = await this.usersRepository.findAll({
+      take: limit + 1,
+      ...(cursor && { skip: 1, cursor: { id: cursor } }),
+    });
+
+    const hasNextPage = rows.length > limit;
+    const items = hasNextPage ? rows.slice(0, limit) : rows;
+    const nextCursor = hasNextPage ? items[items.length - 1].id : null;
 
     return {
-      items: plainToInstance(UserResponseDto, users, {
+      items: plainToInstance(UserResponseDto, items, {
         excludeExtraneousValues: true,
       }),
-      page,
       limit,
-      total,
+      nextCursor,
+      hasNextPage,
     };
   }
 

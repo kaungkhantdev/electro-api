@@ -35,7 +35,7 @@ export class OrderItemResponseDto {
 @Exclude()
 export class PaginatedOrdersResponseDto {
   items: OrderResponseDto[];
-  page: number;
   limit: number;
-  total: number;
+  nextCursor: string | null;
+  hasNextPage: boolean;
 }

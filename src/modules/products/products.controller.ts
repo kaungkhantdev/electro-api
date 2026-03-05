@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ProductService } from './products.service';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { CursorPaginationDto } from 'src/common/dto/cursor-pagination.dto';
 import { Public } from '@/common/decorators/public.decorator';
 
 @Public()
@@ -18,9 +18,9 @@ export class ProductsController {
     status: 200,
     description: 'Products list retrieved successfully',
   })
-  async findAll(@Query() pagination: PaginationDto) {
+  async findAll(@Query() pagination: CursorPaginationDto) {
     return await this.productService.getAllProducts(
-      pagination.page,
+      pagination.cursor,
       pagination.limit,
     );
   }

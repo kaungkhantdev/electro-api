@@ -20,7 +20,7 @@ export class AddressResponseDto {
 @Exclude()
 export class PaginatedAddressResponseDto {
   items: AddressResponseDto[];
-  page: number;
   limit: number;
-  total: number;
+  nextCursor: string | null;
+  hasNextPage: boolean;
 }

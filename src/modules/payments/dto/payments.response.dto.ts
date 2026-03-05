@@ -83,13 +83,13 @@ export class PaginatedPaymentsResponseDto {
   items: PaymentsResponseDto[];
 
   @Expose()
-  page: number;
-
-  @Expose()
   limit: number;
 
   @Expose()
-  total: number;
+  nextCursor: string | null;
+
+  @Expose()
+  hasNextPage: boolean;
 }
 
 export class PaginatedPaymentMethodsResponseDto {
@@ -97,13 +97,13 @@ export class PaginatedPaymentMethodsResponseDto {
   items: PaymentMethodsResponseDto[];
 
   @Expose()
-  page: number;
-
-  @Expose()
   limit: number;
 
   @Expose()
-  total: number;
+  nextCursor: string | null;
+
+  @Expose()
+  hasNextPage: boolean;
 }
 
 export class PaginatedPaymentAuditLogsResponseDto {
@@ -111,11 +111,11 @@ export class PaginatedPaymentAuditLogsResponseDto {
   items: PaymentAuditLogsResponseDto[];
 
   @Expose()
-  page: number;
-
-  @Expose()
   limit: number;
 
   @Expose()
-  total: number;
+  nextCursor: string | null;
+
+  @Expose()
+  hasNextPage: boolean;
 }

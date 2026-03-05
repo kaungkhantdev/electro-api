@@ -66,62 +66,71 @@ export class PaymentsService {
   }
 
   async getAllPayments(
-    page: number,
+    cursor: string | undefined,
     limit: number,
   ): Promise<PaginatedPaymentsResponseDto> {
-    const skip = (page - 1) * limit;
-    const [users, total] = await Promise.all([
-      this.paymentsRepository.findAll({ skip, take: limit }),
-      this.paymentsRepository.count(),
-    ]);
+    const rows = await this.paymentsRepository.findAll({
+      take: limit + 1,
+      ...(cursor && { skip: 1, cursor: { id: cursor } }),
+    });
+
+    const hasNextPage = rows.length > limit;
+    const items = hasNextPage ? rows.slice(0, limit) : rows;
+    const nextCursor = hasNextPage ? items[items.length - 1].id : null;
 
     return {
-      items: plainToInstance(PaymentsResponseDto, users, {
+      items: plainToInstance(PaymentsResponseDto, items, {
         excludeExtraneousValues: true,
       }),
-      page,
       limit,
-      total,
+      nextCursor,
+      hasNextPage,
     };
   }
 
   async getAllPaymentMethods(
-    page: number,
+    cursor: string | undefined,
     limit: number,
   ): Promise<PaginatedPaymentMethodsResponseDto> {
-    const skip = (page - 1) * limit;
-    const [paymentMethods, total] = await Promise.all([
-      this.paymentMethodsRepository.findAll({ skip, take: limit }),
-      this.paymentMethodsRepository.count(),
-    ]);
+    const rows = await this.paymentMethodsRepository.findAll({
+      take: limit + 1,
+      ...(cursor && { skip: 1, cursor: { id: cursor } }),
+    });
+
+    const hasNextPage = rows.length > limit;
+    const items = hasNextPage ? rows.slice(0, limit) : rows;
+    const nextCursor = hasNextPage ? items[items.length - 1].id : null;
 
     return {
-      items: plainToInstance(PaymentMethodsResponseDto, paymentMethods, {
+      items: plainToInstance(PaymentMethodsResponseDto, items, {
         excludeExtraneousValues: true,
       }),
-      page,
       limit,
-      total,
+      nextCursor,
+      hasNextPage,
     };
   }
 
   async getAllPaymentAuditLogs(
-    page: number,
+    cursor: string | undefined,
     limit: number,
   ): Promise<PaginatedPaymentAuditLogsResponseDto> {
-    const skip = (page - 1) * limit;
-    const [paymentAuditLogs, total] = await Promise.all([
-      this.paymentAuditLogsRepository.findAll({ skip, take: limit }),
-      this.paymentAuditLogsRepository.count(),
-    ]);
+    const rows = await this.paymentAuditLogsRepository.findAll({
+      take: limit + 1,
+      ...(cursor && { skip: 1, cursor: { id: cursor } }),
+    });
+
+    const hasNextPage = rows.length > limit;
+    const items = hasNextPage ? rows.slice(0, limit) : rows;
+    const nextCursor = hasNextPage ? items[items.length - 1].id : null;
 
     return {
-      items: plainToInstance(PaymentAuditLogsResponseDto, paymentAuditLogs, {
+      items: plainToInstance(PaymentAuditLogsResponseDto, items, {
         excludeExtraneousValues: true,
       }),
-      page,
       limit,
-      total,
+      nextCursor,
+      hasNextPage,
     };
   }
 

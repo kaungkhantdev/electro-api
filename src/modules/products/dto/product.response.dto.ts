@@ -61,12 +61,12 @@ export class PaginatedProductsResponseDto {
   @ApiProperty({ type: [ProductResponseDto] })
   items: ProductResponseDto[];
 
-  @ApiProperty({ example: 1 })
-  page: number;
-
-  @ApiProperty({ example: 10 })
+  @ApiProperty({ example: 20 })
   limit: number;
 
-  @ApiProperty({ example: 100 })
-  total: number;
+  @ApiProperty({ example: 'clx123abc', nullable: true })
+  nextCursor: string | null;
+
+  @ApiProperty({ example: true })
+  hasNextPage: boolean;
 }

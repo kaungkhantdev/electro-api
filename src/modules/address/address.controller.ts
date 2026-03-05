@@ -12,7 +12,7 @@ import { AddressService } from './address.service';
 import { ApiOperation } from '@nestjs/swagger';
 import { CreateAddressDto, UpdateAddressDto } from './dto/address.dto';
 import { PaginatedAddressResponseDto } from './dto/address.response.dto';
-import { PaginationDto } from '@/common/dto/pagination.dto';
+import { CursorPaginationDto } from '@/common/dto/cursor-pagination.dto';
 import { Address } from 'generated/prisma/client';
 
 @Controller('address')
@@ -34,9 +34,9 @@ export class AddressController {
     description: 'Get all addresses',
   })
   async getAll(
-    @Query() data: PaginationDto,
+    @Query() data: CursorPaginationDto,
   ): Promise<PaginatedAddressResponseDto> {
-    return this.addressService.getAll(data.page, data.limit);
+    return this.addressService.getAll(data.cursor, data.limit);
   }
 
   @Get(':id')

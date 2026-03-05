@@ -2,7 +2,7 @@ import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { RolesGuard } from '@/common/guards/role.guard';
 import { Roles } from '@/common/decorators/roles.decorator';
-import { PaginationDto } from '@/common/dto/pagination.dto';
+import { CursorPaginationDto } from '@/common/dto/cursor-pagination.dto';
 import {
   ApiOperation,
   ApiResponse,
@@ -29,9 +29,9 @@ export class AdminPaymentsController {
   })
   @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
   @ApiForbiddenResponse({ description: 'User does not have ADMIN role' })
-  async findAll(@Query() pagination: PaginationDto) {
+  async findAll(@Query() pagination: CursorPaginationDto) {
     return await this.paymentsService.getAllPayments(
-      pagination.page,
+      pagination.cursor,
       pagination.limit,
     );
   }
@@ -49,9 +49,9 @@ export class AdminPaymentsController {
   })
   @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
   @ApiForbiddenResponse({ description: 'User does not have ADMIN role' })
-  async findAllPaymentMethods(@Query() pagination: PaginationDto) {
+  async findAllPaymentMethods(@Query() pagination: CursorPaginationDto) {
     return await this.paymentsService.getAllPaymentMethods(
-      pagination.page,
+      pagination.cursor,
       pagination.limit,
     );
   }
@@ -69,9 +69,9 @@ export class AdminPaymentsController {
   })
   @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
   @ApiForbiddenResponse({ description: 'User does not have ADMIN role' })
-  async findAllPaymentAuditLogs(@Query() pagination: PaginationDto) {
+  async findAllPaymentAuditLogs(@Query() pagination: CursorPaginationDto) {
     return await this.paymentsService.getAllPaymentAuditLogs(
-      pagination.page,
+      pagination.cursor,
       pagination.limit,
     );
   }

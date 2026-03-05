@@ -64,6 +64,7 @@ export type DefaultTypeMap = RepositoryTypeMap;
 export interface FindAllParams<M extends RepositoryTypeMap = DefaultTypeMap> {
   skip?: number;
   take?: number;
+  cursor?: Record<string, unknown>;
   where?: M['WhereInput'];
   orderBy?: M['OrderByInput'];
   include?: M['Include'];
