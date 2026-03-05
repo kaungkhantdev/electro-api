@@ -18,7 +18,12 @@ export class CategoryService {
   ) {}
 
   async createCategory(data: CreateCategoryDto): Promise<CategoryReponseDto> {
-    const category = await this.categoryRepository.create(data);
+    const slug = data.name.toLowerCase().replace(/\s+/g, '-');
+    const dataWithSlug = {
+      ...data,
+      slug,
+    };
+    const category = await this.categoryRepository.create(dataWithSlug);
     return plainToInstance(CategoryReponseDto, category, {
       excludeExtraneousValues: true,
     });

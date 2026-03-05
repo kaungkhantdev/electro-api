@@ -9,6 +9,7 @@ import {
 import { Request, Response } from 'express';
 import { ErrorResponse } from '../interfaces/response.interface';
 import { resolveRequestId } from '../utils/request-id.util';
+import { Prisma } from 'generated/prisma/client';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -46,6 +47,48 @@ export class HttpExceptionFilter implements ExceptionFilter {
     message: string;
     details?: Record<string, unknown> | string[];
   } {
+    if (exception instanceof Prisma.PrismaClientValidationError) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        code: 'VALIDATION_ERROR',
+        message: 'Database validation error',
+      };
+    }
+
+    if (exception instanceof Prisma.PrismaClientKnownRequestError) {
+      let status = HttpStatus.BAD_REQUEST;
+      let message = 'Database error';
+      let code = 'DB_ERROR';
+
+      switch (exception.code) {
+        case 'P2002':
+          status = HttpStatus.CONFLICT;
+          message = 'Unique constraint failed';
+          code = 'UNIQUE_CONSTRAINT_FAILED';
+          break;
+        case 'P2003':
+          status = HttpStatus.BAD_REQUEST;
+          message = 'Foreign key constraint failed';
+          code = 'FOREIGN_KEY_CONSTRAINT_FAILED';
+          break;
+        case 'P2025':
+          status = HttpStatus.NOT_FOUND;
+          message = 'Record not found';
+          code = 'NOT_FOUND';
+          break;
+      }
+
+      return {
+        status,
+        code,
+        message,
+        details: {
+          prismaCode: exception.code,
+          meta: exception.meta as Record<string, unknown>,
+        },
+      };
+    }
+
     if (exception instanceof HttpException) {
       const status = exception.getStatus();
       const exceptionResponse = exception.getResponse();

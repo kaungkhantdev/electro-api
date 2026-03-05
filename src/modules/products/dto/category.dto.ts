@@ -1,4 +1,4 @@
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsBoolean } from 'class-validator';
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 
 export class CreateCategoryDto {
@@ -21,15 +21,32 @@ export class CreateCategoryDto {
     example: 'Category image',
   })
   @IsString()
-  icon: string;
+  @IsOptional()
+  image: string;
+
+  @ApiProperty({
+    description: 'Category status',
+    example: 'Category status',
+  })
+  @IsString()
+  @IsOptional()
+  status: string;
+
+  @ApiProperty({
+    description: 'Category is featured',
+    example: 'Category is featured',
+  })
+  @IsBoolean()
+  @IsOptional()
+  isFeatured: boolean;
 
   @ApiProperty({
     description: 'Category parent id',
     example: 'Category parent id',
   })
-  @IsString()
   @IsOptional()
-  parentId: string;
+  @IsString()
+  parentId?: string | null;
 }
 
 export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {}
