@@ -76,12 +76,12 @@ describe('TransformInterceptor', () => {
       });
     });
 
-    it('should handle paginated response', (done) => {
+    it('should handle cursor-paginated response with next page', (done) => {
       const paginatedData = {
         items: [{ id: 1 }, { id: 2 }],
-        page: 1,
         limit: 10,
-        total: 25,
+        nextCursor: 'abc123',
+        hasNextPage: true,
       };
       mockCallHandler = createCallHandler(paginatedData);
 
@@ -93,23 +93,20 @@ describe('TransformInterceptor', () => {
       result$.subscribe((response) => {
         expect(response.data).toEqual(paginatedData.items);
         expect(response.meta.pagination).toEqual({
-          page: 1,
           limit: 10,
-          total: 25,
-          totalPages: 3,
-          hasNext: true,
-          hasPrev: false,
+          nextCursor: 'abc123',
+          hasNextPage: true,
         });
         done();
       });
     });
 
-    it('should calculate pagination correctly for last page', (done) => {
+    it('should handle cursor-paginated response on last page', (done) => {
       const paginatedData = {
         items: [{ id: 1 }],
-        page: 3,
         limit: 10,
-        total: 25,
+        nextCursor: null,
+        hasNextPage: false,
       };
       mockCallHandler = createCallHandler(paginatedData);
 
@@ -121,8 +118,8 @@ describe('TransformInterceptor', () => {
       result$.subscribe((response) => {
         expect(response.meta.pagination).toEqual(
           expect.objectContaining({
-            hasNext: false,
-            hasPrev: true,
+            hasNextPage: false,
+            nextCursor: null,
           }),
         );
         done();
@@ -194,12 +191,12 @@ describe('TransformInterceptor', () => {
       });
     });
 
-    it('should handle pagination with single page', (done) => {
+    it('should handle cursor-paginated response with single item', (done) => {
       const paginatedData = {
-        items: [{ id: 1 }, { id: 2 }],
-        page: 1,
+        items: [{ id: 1 }],
         limit: 10,
-        total: 2,
+        nextCursor: null,
+        hasNextPage: false,
       };
       mockCallHandler = createCallHandler(paginatedData);
 
@@ -210,12 +207,9 @@ describe('TransformInterceptor', () => {
 
       result$.subscribe((response) => {
         expect(response.meta.pagination).toEqual({
-          page: 1,
           limit: 10,
-          total: 2,
-          totalPages: 1,
-          hasNext: false,
-          hasPrev: false,
+          nextCursor: null,
+          hasNextPage: false,
         });
         done();
       });

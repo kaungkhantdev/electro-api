@@ -13,19 +13,16 @@ export interface ResponseMeta {
 }
 
 export interface PaginationMeta {
-  page: number;
   limit: number;
-  total: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrev: boolean;
+  nextCursor: string | null;
+  hasNextPage: boolean;
 }
 
 export interface PaginationResult<T> {
   items: T[];
-  page: number;
   limit: number;
-  total: number;
+  nextCursor: string | null;
+  hasNextPage: boolean;
 }
 
 export interface ErrorResponse {

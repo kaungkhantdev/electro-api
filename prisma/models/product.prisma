@@ -1,0 +1,133 @@
+model Category {
+  id          String  @id @default(uuid())
+  name        String
+  slug        String  @unique
+  description String? @db.Text
+  image       String?
+  parentId    String? @map("parent_id")
+  position    Int     @default(0)
+  status      CategoryStatus @default(ACTIVE)
+  isFeatured  Boolean @default(false) @map("is_featured")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Category[] @relation("CategoryHierarchy")
+  products Product[]
+
+  @@map("categories")
+}
+
+enum CategoryStatus {
+  ACTIVE
+  INACTIVE
+  DRAFT
+}
+
+model Product {
+  id               String  @id @default(uuid())
+  name             String
+  slug             String  @unique
+  description      String? @db.Text
+  shortDescription String? @map("short_description") @db.Text
+  sku              String  @unique
+  barcode          String?
+
+  // Pricing
+  price        Decimal  @db.Decimal(10, 2)
+  comparePrice Decimal? @map("compare_price") @db.Decimal(10, 2)
+  costPrice    Decimal? @map("cost_price") @db.Decimal(10, 2)
+
+  // Inventory
+  stock             Int     @default(0)
+  lowStockThreshold Int?    @default(10) @map("low_stock_threshold")
+  trackInventory    Boolean @default(true) @map("track_inventory")
+  allowBackorder    Boolean @default(false) @map("allow_backorder")
+
+  // Organization
+  categoryId String?  @map("category_id")
+  brand      String?
+  vendor     String?
+  tags       String[] // Array of tags
+
+  // SEO
+  metaTitle       String? @map("meta_title")
+  metaDescription String? @map("meta_description") @db.Text
+
+  // Status
+  status     ProductStatus @default(DRAFT)
+  isFeatured Boolean       @default(false) @map("is_featured")
+
+  // Timestamps
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  category      Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  images        ProductImage[]
+  variants      ProductVariant[]
+  reviews       Review[]
+  orderItems    OrderItem[]
+  cartItems     CartItem[]
+  wishlistItems WishlistItem[]
+
+  @@map("products")
+}
+
+model ProductImage {
+  id        String  @id @default(uuid())
+  productId String  @map("product_id")
+  url       String
+  alt       String?
+  position  Int     @default(0)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
+}
+
+model ProductVariant {
+  id           String   @id @default(uuid())
+  productId    String   @map("product_id")
+  name         String
+  sku          String   @unique
+  price        Decimal? @db.Decimal(10, 2)
+  comparePrice Decimal? @map("compare_price") @db.Decimal(10, 2)
+  stock        Int      @default(0)
+
+  image    String?
+  isActive Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  options ProductVariantOption[]
+
+  @@map("product_variants")
+}
+
+model ProductVariantOption {
+  id           String   @id @default(uuid())
+  variantId    String   @map("variant_id")
+  optionName   String   @map("option_name")
+  optionValue  String   @map("option_value")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@map("product_variant_options")
+}
+
+enum ProductStatus {
+  ACTIVE
+  DRAFT
+  ARCHIVED
+  OUT_OF_STOCK
+}

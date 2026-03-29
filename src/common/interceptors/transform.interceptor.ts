@@ -43,8 +43,7 @@ export class TransformInterceptor<T> implements NestInterceptor<
     };
 
     if (this.isPaginate(data)) {
-      const { items, page, limit, total } = data;
-      const totalPages = Math.ceil(total / limit);
+      const { items, limit, nextCursor, hasNextPage } = data;
 
       return {
         success: true,
@@ -52,12 +51,9 @@ export class TransformInterceptor<T> implements NestInterceptor<
         meta: {
           ...meta,
           pagination: {
-            page,
             limit,
-            total,
-            totalPages,
-            hasNext: page < totalPages,
-            hasPrev: page > 1,
+            nextCursor,
+            hasNextPage,
           },
         },
       };
@@ -71,9 +67,9 @@ export class TransformInterceptor<T> implements NestInterceptor<
       typeof data === 'object' &&
       data !== null &&
       'items' in data &&
-      'page' in data &&
+      'hasNextPage' in data &&
       'limit' in data &&
-      'total' in data
+      'nextCursor' in data
     );
   }
 }

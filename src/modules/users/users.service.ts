@@ -10,6 +10,12 @@ import {
   PaginatedUsersResponseDto,
   UserResponseDto,
 } from './dto/users.response.dto';
+import {
+  UpdateUserPasswordDto,
+  UpdateUserProfileDto,
+  UpdateUserRoleDto,
+  UpdateUserStatusDto,
+} from './dto/users.dto';
 
 type CreateUserInput = Pick<
   User,
@@ -38,7 +44,6 @@ export class UsersService {
     // Check if exists
     const existing =
       data.email && (await this.usersRepository.findByEmail(data.email));
-    // console.log(existing);
     if (existing) {
       throw new Error('User already exists');
     }
@@ -55,22 +60,25 @@ export class UsersService {
   }
 
   async getAll(
-    page: number,
+    cursor: string | undefined,
     limit: number,
   ): Promise<PaginatedUsersResponseDto> {
-    const skip = (page - 1) * limit;
-    const [users, total] = await Promise.all([
-      this.usersRepository.findAll({ skip, take: limit }),
-      this.usersRepository.count(),
-    ]);
+    const rows = await this.usersRepository.findAll({
+      take: limit + 1,
+      ...(cursor && { skip: 1, cursor: { id: cursor } }),
+    });
+
+    const hasNextPage = rows.length > limit;
+    const items = hasNextPage ? rows.slice(0, limit) : rows;
+    const nextCursor = hasNextPage ? items[items.length - 1].id : null;
 
     return {
-      items: plainToInstance(UserResponseDto, users, {
+      items: plainToInstance(UserResponseDto, items, {
         excludeExtraneousValues: true,
       }),
-      page,
       limit,
-      total,
+      nextCursor,
+      hasNextPage,
     };
   }
 
@@ -86,5 +94,60 @@ export class UsersService {
 
   async clearRefreshTokenHash(userId: string): Promise<void> {
     await this.usersRepository.update(userId, { refreshTokenHash: null });
+  }
+
+  async updateRole(
+    userId: string,
+    data: UpdateUserRoleDto,
+  ): Promise<UserResponseDto> {
+    const user = await this.usersRepository.update(userId, { role: data.role });
+    return plainToInstance(UserResponseDto, user, {
+      excludeExtraneousValues: true,
+    });
+  }
+
+  async updateStatus(
+    userId: string,
+    data: UpdateUserStatusDto,
+  ): Promise<UserResponseDto> {
+    const user = await this.usersRepository.update(userId, {
+      status: data.status,
+    });
+    return plainToInstance(UserResponseDto, user, {
+      excludeExtraneousValues: true,
+    });
+  }
+
+  async updateProfile(
+    userId: string,
+    data: UpdateUserProfileDto,
+  ): Promise<UserResponseDto> {
+    const user = await this.usersRepository.update(userId, data);
+    return plainToInstance(UserResponseDto, user, {
+      excludeExtraneousValues: true,
+    });
+  }
+
+  async updatePassword(
+    userId: string,
+    data: UpdateUserPasswordDto,
+  ): Promise<UserResponseDto> {
+    // check current password
+    const user = await this.usersRepository.findById(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    const isPasswordValid = await bcrypt.compare(
+      data.currentPassword,
+      user.password,
+    );
+    if (!isPasswordValid) {
+      throw new Error('Invalid current password');
+    }
+
+    const newPass = await this.usersRepository.update(userId, data);
+    return plainToInstance(UserResponseDto, newPass, {
+      excludeExtraneousValues: true,
+    });
   }
 }

@@ -1,0 +1,61 @@
+
+model Refund {
+  id          String  @id @default(uuid())
+  orderId     String  @map("order_id")
+  paymentId   String? @map("payment_id") // Reference to original payment
+  amount      Decimal @db.Decimal(10, 2)
+  currency    String  @default("USD")
+  status      RefundStatus
+  provider    String
+  transactionId String? @map("transaction_id")
+  paymentMethodId String? @map("payment_method_id")
+
+  // Refund details
+  reason       String? // customer_request, damaged_goods, wrong_item, etc.
+  refundType   RefundType @default(FULL) @map("refund_type")
+  refundMethod RefundMethod @default(ORIGINAL_PAYMENT_METHOD) @map("refund_method")
+
+  // Who initiated/approved
+  initiatedBy String? @map("initiated_by") // userId or "SYSTEM"
+  approvedBy  String? @map("approved_by") // userId of approver
+
+  // Additional context
+  notes    String? @db.Text
+  metadata Json? // Provider-specific data, webhook responses, etc.
+
+  // Timestamps
+  approvedAt  DateTime? @map("approved_at")
+  processedAt DateTime? @map("processed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  order         Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  payment       Payment?       @relation(fields: [paymentId], references: [id])
+  paymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
+
+  @@index([orderId])
+  @@index([paymentId])
+  @@map("refunds")
+}
+
+enum RefundStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum RefundType {
+  FULL
+  PARTIAL
+}
+
+enum RefundMethod {
+  ORIGINAL_PAYMENT_METHOD
+  STORE_CREDIT
+  BANK_TRANSFER
+  MANUAL
+  OTHER
+}

@@ -1,0 +1,94 @@
+model Order {
+  id          String @id @default(uuid())
+  orderNumber String @unique @map("order_number")
+  userId      String @map("user_id")
+
+  // Addresses
+  shippingAddressId String? @map("shipping_address_id")
+  billingAddressId  String? @map("billing_address_id")
+
+  // Pricing
+  subtotal Decimal @db.Decimal(10, 2)
+  discount Decimal @default(0) @db.Decimal(10, 2)
+  shipping Decimal @default(0) @db.Decimal(10, 2)
+  tax      Decimal @default(0) @db.Decimal(10, 2)
+  total    Decimal @db.Decimal(10, 2)
+
+  // Status
+  status            OrderStatus       @default(PENDING)
+  paymentStatus     PaymentStatus     @default(PENDING) @map("payment_status")
+  fulfillmentStatus FulfillmentStatus @default(UNFULFILLED) @map("fulfillment_status")
+
+  // Shipping
+  shippingMethod ShippingMethod @map("shipping_method") @default(STANDARD)
+  trackingNumber String? @map("tracking_number")
+  carrier        String?
+
+  // Customer Notes
+  customerNote String? @map("customer_note") @db.Text
+  internalNote String? @map("internal_note") @db.Text
+
+  // Promo/Coupon
+  couponCode String? @map("coupon_code")
+
+  // Timestamps
+  paidAt      DateTime? @map("paid_at")
+  shippedAt   DateTime? @map("shipped_at")
+  deliveredAt DateTime? @map("delivered_at")
+  cancelledAt DateTime? @map("cancelled_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user            User          @relation(fields: [userId], references: [id])
+  shippingAddress Address?      @relation("ShippingAddress", fields: [shippingAddressId], references: [id])
+  billingAddress  Address?      @relation("BillingAddress", fields: [billingAddressId], references: [id])
+  items           OrderItem[]
+  payments        Payment[]
+  refunds         Refund[]
+  paymentAuditLogs PaymentAuditLog[]
+  couponUsages    CouponUsage[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String  @map("order_id")
+  productId String  @map("product_id")
+  variantId String? @map("variant_id")
+
+  name     String // Snapshot of product name
+  sku      String // Snapshot of SKU
+  price    Decimal @db.Decimal(10, 2)
+  quantity Int
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum FulfillmentStatus {
+  UNFULFILLED
+  PARTIALLY_FULFILLED
+  FULFILLED
+  RETURNED
+}
+
+enum ShippingMethod {
+  STANDARD
+  EXPRESS
+  OVERNIGHT
+}
