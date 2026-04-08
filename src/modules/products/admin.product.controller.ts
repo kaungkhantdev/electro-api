@@ -16,6 +16,7 @@ import {
   UpdateProductDto,
   UpdateProductImageDto,
   UpdateProductVariantDto,
+  UpdateProductVariantOptionDto,
 } from './dto/products.dto';
 import { RolesGuard } from '@/common/guards/role.guard';
 import { UseGuards } from '@nestjs/common';
@@ -118,6 +119,23 @@ export class AdminProductController {
     @Body() data: UpdateProductImageDto,
   ) {
     return this.productService.updateProductImage(id, data);
+  }
+
+  @Put('/options/:id')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Update a product variant option',
+    description: 'Updates a product variant option.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Product variant option updated successfully',
+  })
+  async updateProductOption(
+    @Param('id') id: string,
+    @Body() data: UpdateProductVariantOptionDto,
+  ) {
+    return this.productService.updateProductOption(id, data);
   }
 
   @Delete(':id')

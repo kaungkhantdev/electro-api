@@ -8,6 +8,7 @@ import {
   UpdateProductDto,
   UpdateProductImageDto,
   UpdateProductVariantDto,
+  UpdateProductVariantOptionDto,
 } from './dto/products.dto';
 import { plainToInstance } from 'class-transformer';
 import {
@@ -147,6 +148,10 @@ export class ProductService {
 
   async updateProductVariant(id: string, data: UpdateProductVariantDto) {
     return this.productVariantRepository.update(id, data);
+  }
+
+  async updateProductOption(id: string, data: UpdateProductVariantOptionDto) {
+    return this.productVariantOptionRepository.update(id, data);
   }
 
   async deleteProduct(id: string): Promise<ProductResponseDto> {
