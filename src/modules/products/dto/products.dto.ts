@@ -213,6 +213,8 @@ export class ProductImageDto {
   position: number;
 }
 
+export class UpdateProductImageDto extends PartialType(ProductImageDto) {}
+
 export class ProductVariantDto {
   @ApiProperty({
     description: 'Product variant name',
@@ -258,6 +260,8 @@ export class ProductVariantDto {
   @IsOptional()
   options?: ProductVariantOptionDto[];
 }
+
+export class UpdateProductVariantDto extends PartialType(ProductVariantDto) {}
 
 export class ProductVariantOptionDto {
   @ApiProperty({
