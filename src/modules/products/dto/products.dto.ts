@@ -261,7 +261,13 @@ export class CreateProductDto {
 
   @ApiProperty({
     description: 'Product images',
-    example: 'Product images',
+    example: [
+      {
+        url: 'https://example.com/image.jpg',
+        alt: 'Product image',
+        position: 1,
+      },
+    ],
     type: [ProductImageDto],
   })
   @IsArray()
@@ -270,21 +276,26 @@ export class CreateProductDto {
 
   @ApiProperty({
     description: 'Product variants',
-    example: 'Product variants',
+    example: [
+      {
+        name: 'Variant name',
+        sku: 'VARIANT-SKU-001',
+        price: 100,
+        comparePrice: 120,
+        stock: 50,
+        options: [
+          {
+            optionName: 'Color',
+            optionValue: 'Red',
+          },
+        ],
+      },
+    ],
     type: [ProductVariantDto],
   })
   @IsArray()
   @IsOptional()
   variants: ProductVariantDto[];
-
-  @ApiProperty({
-    description: 'Product options',
-    example: 'Product options',
-    type: [ProductVariantOptionDto],
-  })
-  @IsArray()
-  @IsOptional()
-  options: ProductVariantOptionDto[];
 }
 
 export class UpdateProductDto extends PartialType(CreateProductDto) {}

@@ -14,6 +14,8 @@ import { AppService } from './app.service';
 import { ProductsModule } from './modules/products/products.module';
 import { CartsModule } from './modules/carts/carts.module';
 import { OrdersModule } from './modules/orders/orders.module';
+import { CategoryModule } from './modules/category/category.module';
+import { BrandModule } from './modules/brand/brand.module';
 
 @Module({
   imports: [
@@ -33,6 +35,8 @@ import { OrdersModule } from './modules/orders/orders.module';
     UsersModule,
     AuthModule,
     StorageModule,
+    CategoryModule,
+    BrandModule,
     ProductsModule,
     CartsModule,
     OrdersModule,

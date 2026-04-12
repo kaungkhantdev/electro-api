@@ -10,23 +10,12 @@ import { ProductVariantOptionRepository } from './repositories/product-variant-o
 import { PRODUCT_VARIANT_OPTION_REPOSITORY } from './repositories/interfaces/product-variant-option.repository.interface';
 import { AdminProductController } from './admin.product.controller';
 import { ProductsController } from './products.controller';
-import { CategoryController } from './category.controller';
-import { AdminCategoryController } from './admin.category.controller';
-import { CategoryService } from './category.service';
-import { CategoryRepository } from './repositories/category.repository';
-import { CATEGORY_REPOSITORY } from './repositories/interfaces/category.repository.interface';
 
 @Module({
   imports: [],
-  controllers: [
-    CategoryController,
-    AdminCategoryController,
-    AdminProductController,
-    ProductsController,
-  ],
+  controllers: [AdminProductController, ProductsController],
   providers: [
     ProductService,
-    CategoryService,
     {
       provide: PRODUCT_REPOSITORY,
       useClass: ProductRepository,
@@ -42,10 +31,6 @@ import { CATEGORY_REPOSITORY } from './repositories/interfaces/category.reposito
     {
       provide: PRODUCT_VARIANT_OPTION_REPOSITORY,
       useClass: ProductVariantOptionRepository,
-    },
-    {
-      provide: CATEGORY_REPOSITORY,
-      useClass: CategoryRepository,
     },
   ],
   exports: [],

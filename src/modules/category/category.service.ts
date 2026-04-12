@@ -6,7 +6,7 @@ import {
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 import { plainToInstance } from 'class-transformer';
 import {
-  CategoryReponseDto,
+  CategoryResponseDto,
   PaginatedCategoriesResponseDto,
 } from './dto/category.response.dto';
 
@@ -17,14 +17,14 @@ export class CategoryService {
     private readonly categoryRepository: ICategoryRepository,
   ) {}
 
-  async createCategory(data: CreateCategoryDto): Promise<CategoryReponseDto> {
+  async createCategory(data: CreateCategoryDto): Promise<CategoryResponseDto> {
     const slug = data.name.toLowerCase().replace(/\s+/g, '-');
     const dataWithSlug = {
       ...data,
       slug,
     };
     const category = await this.categoryRepository.create(dataWithSlug);
-    return plainToInstance(CategoryReponseDto, category, {
+    return plainToInstance(CategoryResponseDto, category, {
       excludeExtraneousValues: true,
     });
   }
@@ -32,23 +32,23 @@ export class CategoryService {
   async updateCategory(
     id: string,
     data: UpdateCategoryDto,
-  ): Promise<CategoryReponseDto> {
+  ): Promise<CategoryResponseDto> {
     const category = await this.categoryRepository.update(id, data);
-    return plainToInstance(CategoryReponseDto, category, {
+    return plainToInstance(CategoryResponseDto, category, {
       excludeExtraneousValues: true,
     });
   }
 
-  async deleteCategory(id: string): Promise<CategoryReponseDto> {
+  async deleteCategory(id: string): Promise<CategoryResponseDto> {
     const category = await this.categoryRepository.delete(id);
-    return plainToInstance(CategoryReponseDto, category, {
+    return plainToInstance(CategoryResponseDto, category, {
       excludeExtraneousValues: true,
     });
   }
 
-  async getCategoryById(id: string): Promise<CategoryReponseDto | null> {
+  async getCategoryById(id: string): Promise<CategoryResponseDto | null> {
     const category = await this.categoryRepository.findById(id);
-    return plainToInstance(CategoryReponseDto, category, {
+    return plainToInstance(CategoryResponseDto, category, {
       excludeExtraneousValues: true,
     });
   }
@@ -67,7 +67,7 @@ export class CategoryService {
     const nextCursor = hasNextPage ? items[items.length - 1].id : null;
 
     return {
-      items: plainToInstance(CategoryReponseDto, items, {
+      items: plainToInstance(CategoryResponseDto, items, {
         excludeExtraneousValues: true,
       }),
       limit,

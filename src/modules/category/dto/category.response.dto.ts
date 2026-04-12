@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 
 @Exclude()
-export class CategoryReponseDto {
+export class CategoryResponseDto {
   @Expose()
   id: string;
 
@@ -32,8 +32,8 @@ export class CategoryReponseDto {
 }
 
 export class PaginatedCategoriesResponseDto {
-  @ApiProperty({ type: [CategoryReponseDto] })
-  items: CategoryReponseDto[];
+  @ApiProperty({ type: [CategoryResponseDto] })
+  items: CategoryResponseDto[];
 
   @ApiProperty({ example: 20 })
   limit: number;
