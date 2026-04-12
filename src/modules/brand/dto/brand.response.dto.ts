@@ -22,7 +22,7 @@ export class BrandResponseDto {
   updatedAt: Date;
 }
 
-export class PaginatedCategoriesResponseDto {
+export class PaginatedBrandsResponseDto {
   @ApiProperty({ type: [BrandResponseDto] })
   items: BrandResponseDto[];
 

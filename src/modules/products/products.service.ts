@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { paginate } from '@/common/utils/pagination.util';
 import {
   IProductRepository,
   PRODUCT_REPOSITORY,
@@ -10,11 +11,11 @@ import {
   UpdateProductVariantDto,
   UpdateProductVariantOptionDto,
 } from './dto/products.dto';
-import { plainToInstance } from 'class-transformer';
 import {
   PaginatedProductsResponseDto,
   ProductResponseDto,
 } from './dto/product.response.dto';
+import { ProductMapper } from './dto/product.mapper';
 import {
   IProductImageRepository,
   PRODUCT_IMAGE_REPOSITORY,
@@ -102,9 +103,7 @@ export class ProductService {
         product.id,
         this.includeRelations,
       );
-      return plainToInstance(ProductResponseDto, createdProduct, {
-        excludeExtraneousValues: true,
-      });
+      return ProductMapper.toResponseDto(createdProduct)!;
     });
   }
 
@@ -136,9 +135,7 @@ export class ProductService {
         this.includeRelations,
       );
 
-      return plainToInstance(ProductResponseDto, updatedProduct, {
-        excludeExtraneousValues: true,
-      });
+      return ProductMapper.toResponseDto(updatedProduct)!;
     });
   }
 
@@ -156,16 +153,12 @@ export class ProductService {
 
   async deleteProduct(id: string): Promise<ProductResponseDto> {
     const product = await this.productRepository.delete(id);
-    return plainToInstance(ProductResponseDto, product, {
-      excludeExtraneousValues: true,
-    });
+    return ProductMapper.toResponseDto(product);
   }
 
   async getProductById(id: string): Promise<ProductResponseDto | null> {
     const product = await this.productRepository.findById(id);
-    return plainToInstance(ProductResponseDto, product, {
-      excludeExtraneousValues: true,
-    });
+    return ProductMapper.toResponseDto(product);
   }
 
   async getAllProducts(
@@ -177,14 +170,10 @@ export class ProductService {
       ...(cursor && { skip: 1, cursor: { id: cursor } }),
     });
 
-    const hasNextPage = rows.length > limit;
-    const items = hasNextPage ? rows.slice(0, limit) : rows;
-    const nextCursor = hasNextPage ? items[items.length - 1].id : null;
+    const { items, hasNextPage, nextCursor } = paginate(rows, limit);
 
     return {
-      items: plainToInstance(ProductResponseDto, items, {
-        excludeExtraneousValues: true,
-      }),
+      items: ProductMapper.toResponseDto(items),
       limit,
       nextCursor,
       hasNextPage,

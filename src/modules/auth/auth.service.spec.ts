@@ -111,7 +111,7 @@ describe('AuthService', () => {
     });
 
     it('should throw UnauthorizedException for non-existent user', async () => {
-      usersService.getUserByUsername.mockResolvedValue(null);
+      usersService.getUserByUsername.mockResolvedValue(null as any);
 
       await expect(service.login(loginDto)).rejects.toThrow(
         UnauthorizedException,
