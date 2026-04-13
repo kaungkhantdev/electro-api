@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 
 @Exclude()
-export class CategoryReponseDto {
+export class BrandResponseDto {
   @Expose()
   id: string;
 
@@ -13,16 +13,7 @@ export class CategoryReponseDto {
   description: string;
 
   @Expose()
-  icon: string;
-
-  @Expose()
-  parentId: string;
-
-  @Expose()
-  position: number;
-
-  @Expose()
-  isActive: boolean;
+  logo: string;
 
   @Expose()
   createdAt: Date;
@@ -31,9 +22,9 @@ export class CategoryReponseDto {
   updatedAt: Date;
 }
 
-export class PaginatedCategoriesResponseDto {
-  @ApiProperty({ type: [CategoryReponseDto] })
-  items: CategoryReponseDto[];
+export class PaginatedBrandsResponseDto {
+  @ApiProperty({ type: [BrandResponseDto] })
+  items: BrandResponseDto[];
 
   @ApiProperty({ example: 20 })
   limit: number;

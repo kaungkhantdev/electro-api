@@ -1,6 +1,6 @@
 import { Exclude } from 'class-transformer';
-import { CategoryReponseDto } from './category.response.dto';
 import { ApiProperty } from '@nestjs/swagger';
+import { CategoryResponseDto } from '@/modules/category/dto/category.response.dto';
 
 @Exclude()
 export class ProductResponseDto {
@@ -24,7 +24,7 @@ export class ProductResponseDto {
   status: string;
   isFeatured: boolean;
   publishedAt: string;
-  category: CategoryReponseDto;
+  category: CategoryResponseDto;
   images: ProductImageResponseDto[];
   variants: ProductVariantResponseDto[];
 }

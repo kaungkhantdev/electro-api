@@ -1,14 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { paginate } from '@/common/utils/pagination.util';
 import {
   CATEGORY_REPOSITORY,
   ICategoryRepository,
 } from './repositories/interfaces/category.repository.interface';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
-import { plainToInstance } from 'class-transformer';
 import {
-  CategoryReponseDto,
+  CategoryResponseDto,
   PaginatedCategoriesResponseDto,
 } from './dto/category.response.dto';
+import { CategoryMapper } from './dto/category.mapper';
 
 @Injectable()
 export class CategoryService {
@@ -17,40 +18,28 @@ export class CategoryService {
     private readonly categoryRepository: ICategoryRepository,
   ) {}
 
-  async createCategory(data: CreateCategoryDto): Promise<CategoryReponseDto> {
+  async createCategory(data: CreateCategoryDto): Promise<CategoryResponseDto> {
     const slug = data.name.toLowerCase().replace(/\s+/g, '-');
-    const dataWithSlug = {
-      ...data,
-      slug,
-    };
-    const category = await this.categoryRepository.create(dataWithSlug);
-    return plainToInstance(CategoryReponseDto, category, {
-      excludeExtraneousValues: true,
-    });
+    const category = await this.categoryRepository.create({ ...data, slug });
+    return CategoryMapper.toResponseDto(category);
   }
 
   async updateCategory(
     id: string,
     data: UpdateCategoryDto,
-  ): Promise<CategoryReponseDto> {
+  ): Promise<CategoryResponseDto> {
     const category = await this.categoryRepository.update(id, data);
-    return plainToInstance(CategoryReponseDto, category, {
-      excludeExtraneousValues: true,
-    });
+    return CategoryMapper.toResponseDto(category);
   }
 
-  async deleteCategory(id: string): Promise<CategoryReponseDto> {
+  async deleteCategory(id: string): Promise<CategoryResponseDto> {
     const category = await this.categoryRepository.delete(id);
-    return plainToInstance(CategoryReponseDto, category, {
-      excludeExtraneousValues: true,
-    });
+    return CategoryMapper.toResponseDto(category);
   }
 
-  async getCategoryById(id: string): Promise<CategoryReponseDto | null> {
+  async getCategoryById(id: string): Promise<CategoryResponseDto | null> {
     const category = await this.categoryRepository.findById(id);
-    return plainToInstance(CategoryReponseDto, category, {
-      excludeExtraneousValues: true,
-    });
+    return CategoryMapper.toResponseDto(category);
   }
 
   async getAllCategories(
@@ -62,14 +51,10 @@ export class CategoryService {
       ...(cursor && { skip: 1, cursor: { id: cursor } }),
     });
 
-    const hasNextPage = rows.length > limit;
-    const items = hasNextPage ? rows.slice(0, limit) : rows;
-    const nextCursor = hasNextPage ? items[items.length - 1].id : null;
+    const { items, hasNextPage, nextCursor } = paginate(rows, limit);
 
     return {
-      items: plainToInstance(CategoryReponseDto, items, {
-        excludeExtraneousValues: true,
-      }),
+      items: CategoryMapper.toResponseDto(items),
       limit,
       nextCursor,
       hasNextPage,

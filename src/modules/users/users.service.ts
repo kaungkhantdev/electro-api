@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { User } from 'generated/prisma/client';
 import * as bcrypt from 'bcrypt';
-import { plainToInstance } from 'class-transformer';
 import {
   IUsersRepository,
   USER_REPOSITORY,
@@ -16,6 +15,7 @@ import {
   UpdateUserRoleDto,
   UpdateUserStatusDto,
 } from './dto/users.dto';
+import { UserMapper } from './dto/user.mapper';
 
 type CreateUserInput = Pick<
   User,
@@ -73,9 +73,7 @@ export class UsersService {
     const nextCursor = hasNextPage ? items[items.length - 1].id : null;
 
     return {
-      items: plainToInstance(UserResponseDto, items, {
-        excludeExtraneousValues: true,
-      }),
+      items: UserMapper.toResponseDto(items),
       limit,
       nextCursor,
       hasNextPage,
@@ -101,9 +99,7 @@ export class UsersService {
     data: UpdateUserRoleDto,
   ): Promise<UserResponseDto> {
     const user = await this.usersRepository.update(userId, { role: data.role });
-    return plainToInstance(UserResponseDto, user, {
-      excludeExtraneousValues: true,
-    });
+    return UserMapper.toResponseDto(user);
   }
 
   async updateStatus(
@@ -113,9 +109,7 @@ export class UsersService {
     const user = await this.usersRepository.update(userId, {
       status: data.status,
     });
-    return plainToInstance(UserResponseDto, user, {
-      excludeExtraneousValues: true,
-    });
+    return UserMapper.toResponseDto(user);
   }
 
   async updateProfile(
@@ -123,9 +117,7 @@ export class UsersService {
     data: UpdateUserProfileDto,
   ): Promise<UserResponseDto> {
     const user = await this.usersRepository.update(userId, data);
-    return plainToInstance(UserResponseDto, user, {
-      excludeExtraneousValues: true,
-    });
+    return UserMapper.toResponseDto(user);
   }
 
   async updatePassword(
@@ -146,8 +138,6 @@ export class UsersService {
     }
 
     const newPass = await this.usersRepository.update(userId, data);
-    return plainToInstance(UserResponseDto, newPass, {
-      excludeExtraneousValues: true,
-    });
+    return UserMapper.toResponseDto(newPass);
   }
 }

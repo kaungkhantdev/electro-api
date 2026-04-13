@@ -11,7 +11,13 @@ import {
 import { ProductService } from './products.service';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CursorPaginationDto } from 'src/common/dto/cursor-pagination.dto';
-import { CreateProductDto, UpdateProductDto } from './dto/products.dto';
+import {
+  CreateProductDto,
+  UpdateProductDto,
+  UpdateProductImageDto,
+  UpdateProductVariantDto,
+  UpdateProductVariantOptionDto,
+} from './dto/products.dto';
 import { RolesGuard } from '@/common/guards/role.guard';
 import { UseGuards } from '@nestjs/common';
 import { Roles } from '@/common/decorators/roles.decorator';
@@ -79,6 +85,57 @@ export class AdminProductController {
   })
   async updateProduct(@Param('id') id: string, @Body() data: UpdateProductDto) {
     return this.productService.updateProduct(id, data);
+  }
+
+  @Put('/variants/:id')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Update a product variant',
+    description: 'Updates a product variant.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Product variant updated successfully',
+  })
+  async updateProductVariant(
+    @Param('id') id: string,
+    @Body() data: UpdateProductVariantDto,
+  ) {
+    return this.productService.updateProductVariant(id, data);
+  }
+
+  @Put('/images/:id')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Update a product image',
+    description: 'Updates a product image.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Product image updated successfully',
+  })
+  async updateProductImage(
+    @Param('id') id: string,
+    @Body() data: UpdateProductImageDto,
+  ) {
+    return this.productService.updateProductImage(id, data);
+  }
+
+  @Put('/options/:id')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Update a product variant option',
+    description: 'Updates a product variant option.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Product variant option updated successfully',
+  })
+  async updateProductOption(
+    @Param('id') id: string,
+    @Body() data: UpdateProductVariantOptionDto,
+  ) {
+    return this.productService.updateProductOption(id, data);
   }
 
   @Delete(':id')
