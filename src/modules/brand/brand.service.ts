@@ -8,7 +8,7 @@ import {
   BRAND_REPOSITORY,
   IBrandRepository,
 } from './repositories/interface/brand.repository.interface';
-import { CreateBrandDto } from './dto/brand.dto';
+import { CreateBrandDto, UpdateBrandDto } from './dto/brand.dto';
 import { Brand } from 'generated/prisma/browser';
 import { PaginatedBrandsResponseDto } from './dto/brand.response.dto';
 import { paginate } from '@/common/utils/pagination.util';
@@ -48,10 +48,11 @@ export class BrandService {
     return brand;
   }
 
-  async updateBrand(id: string, dto: CreateBrandDto): Promise<Brand> {
+  async updateBrand(id: string, dto: UpdateBrandDto): Promise<Brand> {
     await this.getBrandById(id);
-    const newSlug = this.generateSlug(dto.name);
+    if (!dto.name) return await this.brandRepository.update(id, dto);
 
+    const newSlug = this.generateSlug(dto.name);
     if (await this.hasSlug(newSlug))
       throw new ConflictException('Slug already exists');
 
