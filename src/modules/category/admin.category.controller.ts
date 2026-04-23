@@ -7,18 +7,19 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CursorPaginationDto } from 'src/common/dto/cursor-pagination.dto';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 import { RolesGuard } from '@/common/guards/role.guard';
-import { UseGuards } from '@nestjs/common';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { UserRole } from 'generated/prisma/enums';
 
 @Controller('admin/categories')
 @UseGuards(RolesGuard)
+@ApiBearerAuth('JWT-auth')
 export class AdminCategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 

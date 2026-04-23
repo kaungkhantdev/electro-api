@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ProductService } from './products.service';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CursorPaginationDto } from 'src/common/dto/cursor-pagination.dto';
 import {
   CreateProductDto,
@@ -25,6 +25,7 @@ import { UserRole } from 'generated/prisma/enums';
 
 @Controller('admin/products')
 @UseGuards(RolesGuard)
+@ApiBearerAuth('JWT-auth')
 export class AdminProductController {
   constructor(private readonly productService: ProductService) {}
 

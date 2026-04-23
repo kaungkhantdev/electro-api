@@ -7,11 +7,11 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CursorPaginationDto } from 'src/common/dto/cursor-pagination.dto';
 import { RolesGuard } from '@/common/guards/role.guard';
-import { UseGuards } from '@nestjs/common';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { UserRole } from 'generated/prisma/enums';
 import { BrandService } from './brand.service';
@@ -19,6 +19,7 @@ import { CreateBrandDto, UpdateBrandDto } from './dto/brand.dto';
 
 @Controller('admin/brands')
 @UseGuards(RolesGuard)
+@ApiBearerAuth('JWT-auth')
 export class AdminBrandController {
   constructor(private readonly brandService: BrandService) {}
 

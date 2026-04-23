@@ -4,10 +4,11 @@ import { RolesGuard } from '@/common/guards/role.guard';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { UserRole } from 'generated/prisma/enums';
 import { CursorPaginationDto } from '@/common/dto/cursor-pagination.dto';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Controller('admin/orders')
 @UseGuards(RolesGuard)
+@ApiBearerAuth('JWT-auth')
 @Roles(UserRole.ADMIN)
 export class AdminOrdersController {
   constructor(private readonly ordersService: OrdersService) {}
