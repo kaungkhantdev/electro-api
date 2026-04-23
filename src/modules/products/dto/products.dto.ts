@@ -193,15 +193,7 @@ export class CreateProductDto {
   })
   @IsString()
   @IsOptional()
-  brand: string;
-
-  @ApiProperty({
-    description: 'Product vendor',
-    example: 'Product vendor',
-  })
-  @IsString()
-  @IsOptional()
-  vendor: string;
+  brandId: string;
 
   @ApiProperty({
     description: 'Product tags',

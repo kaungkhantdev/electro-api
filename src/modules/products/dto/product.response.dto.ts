@@ -17,7 +17,6 @@ export class ProductResponseDto {
   trackInventory: boolean;
   allowBackorder: boolean;
   brand: string;
-  vendor: string;
   tags: string[];
   metaTitle: string;
   metaDescription: string;
