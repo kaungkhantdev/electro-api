@@ -94,10 +94,11 @@ export class ProductService {
 
   async createProduct(data: CreateProductDto): Promise<ProductResponseDto> {
     return this.productRepository.transaction(async () => {
-      const product = await this.productRepository.create(data);
+      const { images, variants, ...productData } = data;
+      const product = await this.productRepository.create(productData);
 
-      await this.createImages(product.id, data.images);
-      await this.createVariants(product.id, data.variants);
+      await this.createImages(product.id, images);
+      await this.createVariants(product.id, variants);
 
       const createdProduct = await this.productRepository.findById(
         product.id,
