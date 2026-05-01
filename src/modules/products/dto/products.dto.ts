@@ -4,8 +4,11 @@ import {
   IsNumber,
   IsBoolean,
   IsArray,
+  IsEnum,
+  IsDateString,
 } from 'class-validator';
 import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { ProductStatus } from 'generated/prisma/enums';
 
 export class ProductImageDto {
   @ApiProperty({
@@ -189,7 +192,7 @@ export class CreateProductDto {
 
   @ApiProperty({
     description: 'Product brand',
-    example: 'Product brand',
+    example: '1',
   })
   @IsString()
   @IsOptional()
@@ -197,9 +200,10 @@ export class CreateProductDto {
 
   @ApiProperty({
     description: 'Product tags',
-    example: 'Product tags',
+    example: ['electronics', 'sale'],
+    type: [String],
   })
-  @IsString()
+  @IsArray()
   @IsOptional()
   tags: string[];
 
@@ -221,11 +225,12 @@ export class CreateProductDto {
 
   @ApiProperty({
     description: 'Product status',
-    example: 'Product status',
+    enum: ProductStatus,
+    example: ProductStatus.DRAFT,
   })
-  @IsString()
+  @IsEnum(ProductStatus)
   @IsOptional()
-  status: string;
+  status: ProductStatus;
 
   @ApiProperty({
     description: 'Product is featured',
@@ -237,15 +242,15 @@ export class CreateProductDto {
 
   @ApiProperty({
     description: 'Product published at',
-    example: 'Product published at',
+    example: '2024-01-01T00:00:00.000Z',
   })
-  @IsString()
+  @IsDateString()
   @IsOptional()
   publishedAt: string;
 
   @ApiProperty({
     description: 'Product category id',
-    example: 'Product category id',
+    example: '1',
   })
   @IsString()
   @IsOptional()
