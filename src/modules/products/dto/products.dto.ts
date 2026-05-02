@@ -251,9 +251,7 @@ export class CreateProductBaseDto {
   @IsString()
   @IsOptional()
   categoryId: string;
-}
 
-export class CreateProductDto extends CreateProductBaseDto {
   @ApiProperty({
     description: 'Product tags',
     example: ['electronics', 'sale'],
@@ -262,7 +260,9 @@ export class CreateProductDto extends CreateProductBaseDto {
   @IsArray()
   @IsOptional()
   tags!: string[];
+}
 
+export class CreateProductDto extends CreateProductBaseDto {
   @ApiProperty({
     description: 'Product images',
     example: [

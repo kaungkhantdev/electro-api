@@ -75,6 +75,12 @@ export class ProductService {
     }
   }
 
+  private async deleteProductTags(productId: string) {
+    await this.prisma.productTag.deleteMany({
+      where: { productId },
+    });
+  }
+
   private async createImages(
     productId: string,
     images: CreateProductDto['images'],
@@ -189,16 +195,22 @@ export class ProductService {
     await this.validateCategoryId(data.categoryId);
     await this.validateBrandId(data.brandId);
     await this.validateProductId(id);
+    const { tags, ...rest } = data;
     return this.productRepository.transaction(async () => {
       const product = await this.productRepository.update(
         id,
-        stripUndefined(data) as any,
+        stripUndefined(rest) as any,
       );
 
       const updatedProduct = await this.productRepository.findById(
         product.id,
         this.includeRelations,
       );
+
+      if (tags) {
+        await this.deleteProductTags(product.id);
+        await this.createProductTags(product.id, tags);
+      }
 
       return ProductMapper.toResponseDto(updatedProduct)!;
     });
