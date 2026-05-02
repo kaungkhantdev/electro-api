@@ -14,12 +14,6 @@ export class BrandResponseDto {
 
   @Expose()
   logo: string;
-
-  @Expose()
-  createdAt: Date;
-
-  @Expose()
-  updatedAt: Date;
 }
 
 export class PaginatedBrandsResponseDto {

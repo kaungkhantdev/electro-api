@@ -96,7 +96,12 @@ export class ProductVariantDto {
 
   @ApiProperty({
     description: 'Product variant options',
-    example: 'Product variant options',
+    example: [
+      {
+        optionName: 'Color',
+        optionValue: 'Red',
+      },
+    ],
     type: [ProductVariantOptionDto],
   })
   @IsArray()
@@ -106,7 +111,7 @@ export class ProductVariantDto {
 
 export class UpdateProductVariantDto extends PartialType(ProductVariantDto) {}
 
-export class CreateProductDto {
+export class CreateProductBaseDto {
   @ApiProperty({
     description: 'Product name',
     example: 'Product name',
@@ -199,15 +204,6 @@ export class CreateProductDto {
   brandId: string;
 
   @ApiProperty({
-    description: 'Product tags',
-    example: ['electronics', 'sale'],
-    type: [String],
-  })
-  @IsArray()
-  @IsOptional()
-  tags: string[];
-
-  @ApiProperty({
     description: 'Product meta title',
     example: 'Product meta title',
   })
@@ -255,6 +251,17 @@ export class CreateProductDto {
   @IsString()
   @IsOptional()
   categoryId: string;
+}
+
+export class CreateProductDto extends CreateProductBaseDto {
+  @ApiProperty({
+    description: 'Product tags',
+    example: ['electronics', 'sale'],
+    type: [String],
+  })
+  @IsArray()
+  @IsOptional()
+  tags!: string[];
 
   @ApiProperty({
     description: 'Product images',
@@ -269,7 +276,7 @@ export class CreateProductDto {
   })
   @IsArray()
   @IsOptional()
-  images: ProductImageDto[];
+  images!: ProductImageDto[];
 
   @ApiProperty({
     description: 'Product variants',
@@ -292,7 +299,7 @@ export class CreateProductDto {
   })
   @IsArray()
   @IsOptional()
-  variants: ProductVariantDto[];
+  variants!: ProductVariantDto[];
 }
 
-export class UpdateProductDto extends PartialType(CreateProductDto) {}
+export class UpdateProductDto extends PartialType(CreateProductBaseDto) {}

@@ -4,6 +4,7 @@ import { PRODUCT_REPOSITORY } from './repositories/interfaces/product.repository
 import { PRODUCT_IMAGE_REPOSITORY } from './repositories/interfaces/product-image.repository.interface';
 import { PRODUCT_VARIANT_REPOSITORY } from './repositories/interfaces/product-variant.repository.interface';
 import { PRODUCT_VARIANT_OPTION_REPOSITORY } from './repositories/interfaces/product-variant-option.repository.interface';
+import { PrismaService } from '@/database/prisma.service';
 
 const mockProduct = {
   id: 'product-1',
@@ -35,19 +36,36 @@ describe('ProductService', () => {
     create: jest.Mock;
     update: jest.Mock;
     delete: jest.Mock;
+    exists: jest.Mock;
     findById: jest.Mock;
     findAll: jest.Mock;
   };
   let productImageRepository: {
     createMany: jest.Mock;
     deleteMany: jest.Mock;
+    update: jest.Mock;
+    exists: jest.Mock;
   };
   let productVariantRepository: {
     create: jest.Mock;
     deleteMany: jest.Mock;
+    update: jest.Mock;
+    exists: jest.Mock;
   };
   let productVariantOptionRepository: {
     createMany: jest.Mock;
+    update: jest.Mock;
+    exists: jest.Mock;
+  };
+
+  const includeRelations = {
+    include: {
+      images: true,
+      variants: { include: { options: true } },
+      brand: true,
+      category: true,
+      tags: { include: { tag: true } },
+    },
   };
 
   beforeEach(async () => {
@@ -56,6 +74,7 @@ describe('ProductService', () => {
       create: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+      exists: jest.fn().mockResolvedValue(true),
       findById: jest.fn(),
       findAll: jest.fn(),
     };
@@ -63,15 +82,21 @@ describe('ProductService', () => {
     productImageRepository = {
       createMany: jest.fn(),
       deleteMany: jest.fn(),
+      update: jest.fn(),
+      exists: jest.fn().mockResolvedValue(true),
     };
 
     productVariantRepository = {
       create: jest.fn(),
       deleteMany: jest.fn(),
+      update: jest.fn(),
+      exists: jest.fn().mockResolvedValue(true),
     };
 
     productVariantOptionRepository = {
       createMany: jest.fn(),
+      update: jest.fn(),
+      exists: jest.fn().mockResolvedValue(true),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -86,6 +111,19 @@ describe('ProductService', () => {
         {
           provide: PRODUCT_VARIANT_OPTION_REPOSITORY,
           useValue: productVariantOptionRepository,
+        },
+        {
+          provide: PrismaService,
+          useValue: {
+            category: {
+              findUnique: jest.fn().mockResolvedValue({ id: 'cat-1' }),
+            },
+            brand: {
+              findUnique: jest.fn().mockResolvedValue({ id: 'brand-1' }),
+            },
+            tag: { upsert: jest.fn() },
+            productTag: { create: jest.fn() },
+          },
         },
       ],
     }).compile();
@@ -110,7 +148,13 @@ describe('ProductService', () => {
       await service.createProduct(dto);
 
       expect(productRepository.transaction).toHaveBeenCalled();
-      expect(productRepository.create).toHaveBeenCalledWith(dto);
+      expect(productRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: dto.name,
+          price: dto.price,
+          categoryId: dto.categoryId,
+        }),
+      );
       expect(productImageRepository.createMany).not.toHaveBeenCalled();
       expect(productVariantRepository.create).not.toHaveBeenCalled();
     });
@@ -176,14 +220,15 @@ describe('ProductService', () => {
 
       await service.createProduct(dto);
 
-      expect(productRepository.findById).toHaveBeenCalledWith('product-1', {
-        include: { images: true, variants: { include: { options: true } } },
-      });
+      expect(productRepository.findById).toHaveBeenCalledWith(
+        'product-1',
+        includeRelations,
+      );
     });
   });
 
   describe('updateProduct', () => {
-    it('should update product data only when no images or variants provided', async () => {
+    it('should update product fields and re-fetch with includes', async () => {
       const dto = { name: 'Updated Name' } as any;
       productRepository.update.mockResolvedValue({
         ...mockProduct,
@@ -200,101 +245,43 @@ describe('ProductService', () => {
       expect(productRepository.update).toHaveBeenCalledWith('product-1', {
         name: 'Updated Name',
       });
-      expect(productImageRepository.deleteMany).not.toHaveBeenCalled();
-      expect(productVariantRepository.deleteMany).not.toHaveBeenCalled();
-    });
-
-    it('should replace images when images array is provided', async () => {
-      const dto = {
-        name: 'Updated',
-        images: [{ url: 'https://example.com/new.jpg', alt: 'new' }],
-      } as any;
-      productRepository.update.mockResolvedValue(mockProduct);
-      productRepository.findById.mockResolvedValue(mockProduct);
-
-      await service.updateProduct('product-1', dto);
-
-      expect(productImageRepository.deleteMany).toHaveBeenCalledWith({
-        productId: 'product-1',
-      });
-      expect(productImageRepository.createMany).toHaveBeenCalledWith([
-        {
-          productId: 'product-1',
-          url: 'https://example.com/new.jpg',
-          alt: 'new',
-        },
-      ]);
-    });
-
-    it('should delete images but not create when images is empty array', async () => {
-      const dto = { images: [] } as any;
-      productRepository.update.mockResolvedValue(mockProduct);
-      productRepository.findById.mockResolvedValue(mockProduct);
-
-      await service.updateProduct('product-1', dto);
-
-      expect(productImageRepository.deleteMany).toHaveBeenCalledWith({
-        productId: 'product-1',
-      });
-      expect(productImageRepository.createMany).not.toHaveBeenCalled();
-    });
-
-    it('should replace variants when variants array is provided', async () => {
-      const dto = {
-        variants: [
-          {
-            name: 'Size L',
-            sku: 'SKU-L',
-            price: 109.99,
-            comparePrice: null,
-            stock: 5,
-            options: [],
-          },
-        ],
-      } as any;
-      const newVariant = { ...mockVariant, id: 'variant-2', name: 'Size L' };
-      productRepository.update.mockResolvedValue(mockProduct);
-      productVariantRepository.create.mockResolvedValue(newVariant);
-      productRepository.findById.mockResolvedValue(mockProduct);
-
-      await service.updateProduct('product-1', dto);
-
-      expect(productVariantRepository.deleteMany).toHaveBeenCalledWith({
-        productId: 'product-1',
-      });
-      expect(productVariantRepository.create).toHaveBeenCalled();
-    });
-
-    it('should re-fetch product with includes after update', async () => {
-      const dto = { name: 'Updated' } as any;
-      productRepository.update.mockResolvedValue(mockProduct);
-      productRepository.findById.mockResolvedValue(mockProduct);
-
-      await service.updateProduct('product-1', dto);
-
-      expect(productRepository.findById).toHaveBeenCalledWith('product-1', {
-        include: { images: true, variants: { include: { options: true } } },
-      });
+      expect(productRepository.findById).toHaveBeenCalledWith(
+        'product-1',
+        includeRelations,
+      );
     });
   });
 
   describe('deleteProduct', () => {
-    it('should delegate to productRepository.delete', async () => {
+    it('should check existence then delete', async () => {
       productRepository.delete.mockResolvedValue(mockProduct);
 
       await service.deleteProduct('product-1');
 
+      expect(productRepository.exists).toHaveBeenCalledWith('product-1');
       expect(productRepository.delete).toHaveBeenCalledWith('product-1');
+    });
+
+    it('should throw NotFoundException when product does not exist', async () => {
+      productRepository.exists.mockResolvedValue(false);
+
+      await expect(service.deleteProduct('product-1')).rejects.toThrow(
+        'Product not found',
+      );
+      expect(productRepository.delete).not.toHaveBeenCalled();
     });
   });
 
   describe('getProductById', () => {
-    it('should fetch product by id', async () => {
+    it('should fetch product by id with includes', async () => {
       productRepository.findById.mockResolvedValue(mockProduct);
 
       await service.getProductById('product-1');
 
-      expect(productRepository.findById).toHaveBeenCalledWith('product-1');
+      expect(productRepository.findById).toHaveBeenCalledWith(
+        'product-1',
+        includeRelations,
+      );
     });
   });
 
@@ -304,7 +291,10 @@ describe('ProductService', () => {
 
       const result = await service.getAllProducts(undefined, 10);
 
-      expect(productRepository.findAll).toHaveBeenCalledWith({ take: 11 });
+      expect(productRepository.findAll).toHaveBeenCalledWith({
+        take: 11,
+        ...includeRelations,
+      });
       expect(result.limit).toBe(10);
       expect(result.hasNextPage).toBe(false);
       expect(result.nextCursor).toBeNull();
@@ -319,6 +309,7 @@ describe('ProductService', () => {
         take: 11,
         skip: 1,
         cursor: { id: 'cursor-abc' },
+        ...includeRelations,
       });
     });
 

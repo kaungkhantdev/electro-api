@@ -30,6 +30,12 @@ import {
 } from './repositories/interfaces/product-variant.repository.interface';
 import { PrismaService } from '@/database/prisma.service';
 
+function stripUndefined<T extends object>(obj: T): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, v]) => v !== undefined),
+  ) as Partial<T>;
+}
+
 @Injectable()
 export class ProductService {
   constructor(
@@ -131,8 +137,29 @@ export class ProductService {
     if (!brand) throw new NotFoundException('Brand not found');
   }
 
+  private async validateProductId(productId: string) {
+    const exists = await this.productRepository.exists(productId);
+    if (!exists) throw new NotFoundException('Product not found');
+  }
+
+  private async validateProductImageId(imageId: string) {
+    const exists = await this.productImageRepository.exists(imageId);
+    if (!exists) throw new NotFoundException('Product image not found');
+  }
+
+  private async validateProductVariantId(variantId: string) {
+    const exists = await this.productVariantRepository.exists(variantId);
+    if (!exists) throw new NotFoundException('Product variant not found');
+  }
+
   private readonly includeRelations = {
-    include: { images: true, variants: { include: { options: true } } },
+    include: {
+      images: true,
+      variants: { include: { options: true } },
+      brand: true,
+      category: true,
+      tags: { include: { tag: true } },
+    },
   };
 
   async createProduct(data: CreateProductDto): Promise<ProductResponseDto> {
@@ -161,24 +188,12 @@ export class ProductService {
   ): Promise<ProductResponseDto> {
     await this.validateCategoryId(data.categoryId);
     await this.validateBrandId(data.brandId);
+    await this.validateProductId(id);
     return this.productRepository.transaction(async () => {
-      const { images, variants, ...productData } = data;
-
-      const product = await this.productRepository.update(id, productData);
-
-      if (images !== undefined) {
-        await this.productImageRepository.deleteMany({ productId: id });
-        if (images.length) {
-          await this.productImageRepository.createMany(
-            images.map((image) => ({ productId: id, ...image })),
-          );
-        }
-      }
-
-      if (variants !== undefined) {
-        await this.productVariantRepository.deleteMany({ productId: id });
-        await this.createVariants(product.id, variants);
-      }
+      const product = await this.productRepository.update(
+        id,
+        stripUndefined(data) as any,
+      );
 
       const updatedProduct = await this.productRepository.findById(
         product.id,
@@ -190,24 +205,50 @@ export class ProductService {
   }
 
   async updateProductImage(id: string, data: UpdateProductImageDto) {
+    await this.validateProductImageId(id);
     return this.productImageRepository.update(id, data);
   }
 
   async updateProductVariant(id: string, data: UpdateProductVariantDto) {
-    return this.productVariantRepository.update(id, data);
+    await this.validateProductVariantId(id);
+    const { options, ...rest } = data;
+
+    if (options) {
+      await this.updateProductOption(id, options);
+    }
+    return this.productVariantRepository.update(
+      id,
+      stripUndefined(rest) as any,
+    );
   }
 
-  async updateProductOption(id: string, data: UpdateProductVariantOptionDto) {
-    return this.productVariantOptionRepository.update(id, data);
+  async updateProductOption(
+    variantId: string,
+    data: UpdateProductVariantOptionDto[],
+  ) {
+    await this.productVariantOptionRepository.deleteMany({
+      variantId: variantId,
+    });
+    await this.productVariantOptionRepository.createMany(
+      data.map((option) => ({
+        variantId: variantId,
+        optionName: option.optionName,
+        optionValue: option.optionValue,
+      })),
+    );
   }
 
-  async deleteProduct(id: string): Promise<ProductResponseDto> {
+  async deleteProduct(id: string): Promise<boolean> {
+    await this.validateProductId(id);
     const product = await this.productRepository.delete(id);
-    return ProductMapper.toResponseDto(product);
+    return !!product;
   }
 
   async getProductById(id: string): Promise<ProductResponseDto | null> {
-    const product = await this.productRepository.findById(id);
+    const product = await this.productRepository.findById(
+      id,
+      this.includeRelations,
+    );
     return ProductMapper.toResponseDto(product);
   }
 
@@ -218,6 +259,7 @@ export class ProductService {
     const rows = await this.productRepository.findAll({
       take: limit + 1,
       ...(cursor && { skip: 1, cursor: { id: cursor } }),
+      ...this.includeRelations,
     });
 
     const { items, hasNextPage, nextCursor } = paginate(rows, limit);

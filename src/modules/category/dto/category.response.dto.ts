@@ -23,12 +23,6 @@ export class CategoryResponseDto {
 
   @Expose()
   isActive: boolean;
-
-  @Expose()
-  createdAt: Date;
-
-  @Expose()
-  updatedAt: Date;
 }
 
 export class PaginatedCategoriesResponseDto {
