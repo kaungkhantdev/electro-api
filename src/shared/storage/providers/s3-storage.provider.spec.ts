@@ -4,13 +4,12 @@ import {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
-  GetObjectCommand,
 } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+// import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import * as buildKeyUtil from '@/common/utils/build-key.util';
 
 jest.mock('@aws-sdk/client-s3');
-jest.mock('@aws-sdk/s3-request-presigner');
+// jest.mock('@aws-sdk/s3-request-presigner');
 jest.mock('@/common/utils/build-key.util');
 
 describe('S3StorageProvider', () => {
@@ -40,9 +39,9 @@ describe('S3StorageProvider', () => {
     (S3Client as jest.Mock).mockImplementation(() => ({
       send: mockSend,
     }));
-    (getSignedUrl as jest.Mock).mockResolvedValue(
-      'https://signed-url.example.com',
-    );
+    // (getSignedUrl as jest.Mock).mockResolvedValue(
+    //   'https://test-bucket.s3.eu-west-1.amazonaws.com/mock-key',
+    // );
     (buildKeyUtil.buildKey as jest.Mock).mockReturnValue('mock-key');
 
     provider = new S3StorageProvider(mockConfig);
@@ -94,7 +93,7 @@ describe('S3StorageProvider', () => {
 
       expect(result).toEqual({
         key: 'mock-key',
-        url: 'https://signed-url.example.com',
+        url: 'https://test-bucket.s3.eu-west-1.amazonaws.com/mock-key',
         mimetype: 'image/png',
         size: 1024,
       });
@@ -120,15 +119,11 @@ describe('S3StorageProvider', () => {
   });
 
   describe('getUrl', () => {
-    it('should generate presigned URL with 3600s expiry', async () => {
-      const url = await provider.getUrl('some-key');
-
-      expect(getSignedUrl).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.any(GetObjectCommand),
-        { expiresIn: 3600 },
+    it('should return the endpoint-based URL for the given key', () => {
+      const url = provider.getUrl('some-key');
+      expect(url).toBe(
+        'https://test-bucket.s3.eu-west-1.amazonaws.com/some-key',
       );
-      expect(url).toBe('https://signed-url.example.com');
     });
   });
 });

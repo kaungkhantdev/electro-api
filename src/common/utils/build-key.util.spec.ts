@@ -1,43 +1,73 @@
-import * as crypto from 'crypto';
+import { randomUUID } from 'crypto';
 import { buildKey } from './build-key.util';
 
 jest.mock('crypto', () => ({
-  ...jest.requireActual('crypto'),
   randomUUID: jest.fn(),
 }));
+
+const mockRandomUUID = randomUUID as jest.Mock;
 
 describe('buildKey', () => {
   const mockUUID = '550e8400-e29b-41d4-a716-446655440000';
 
   beforeEach(() => {
-    (crypto.randomUUID as jest.Mock).mockReturnValue(mockUUID);
+    mockRandomUUID.mockReturnValue(mockUUID);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should return uuid-prefixed filename without folder', () => {
-    const result = buildKey('photo.png');
-    expect(result).toBe(`${mockUUID}-photo.png`);
+  describe('without folder', () => {
+    it('preserves the file extension', () => {
+      expect(buildKey('photo.png')).toBe(`${mockUUID}-photo.png`);
+    });
+
+    it('preserves jpg extension', () => {
+      expect(buildKey('image.jpg')).toBe(`${mockUUID}-image.jpg`);
+    });
+
+    it('converts filename and extension to lowercase', () => {
+      expect(buildKey('MyPhoto.PNG')).toBe(`${mockUUID}-myphoto.png`);
+    });
+
+    it('replaces spaces in the name with hyphens', () => {
+      expect(buildKey('my photo.jpg')).toBe(`${mockUUID}-my-photo.jpg`);
+    });
+
+    it('collapses multiple spaces into a single hyphen', () => {
+      expect(buildKey('my  photo.jpg')).toBe(`${mockUUID}-my-photo.jpg`);
+    });
+
+    it('removes special characters from the name', () => {
+      expect(buildKey('file@#$.png')).toBe(`${mockUUID}-file.png`);
+    });
+
+    it('trims leading and trailing spaces from the name', () => {
+      expect(buildKey('  photo.jpg  ')).toBe(`${mockUUID}-photo.jpg`);
+    });
   });
 
-  it('should return folder/uuid-prefixed filename with folder', () => {
-    const result = buildKey('photo.png', 'avatars');
-    expect(result).toBe(`avatars/${mockUUID}-photo.png`);
+  describe('with folder', () => {
+    it('prepends folder with slash separator', () => {
+      expect(buildKey('photo.png', 'avatars')).toBe(
+        `avatars/${mockUUID}-photo.png`,
+      );
+    });
+
+    it('applies sanitization rules when folder is provided', () => {
+      expect(buildKey('My Photo.JPG', 'uploads')).toBe(
+        `uploads/${mockUUID}-my-photo.jpg`,
+      );
+    });
   });
 
-  it('should always contain the original filename', () => {
-    const result = buildKey('document.pdf');
-    expect(result).toContain('document.pdf');
-  });
-
-  it('should product unique keys on each call', () => {
-    (crypto.randomUUID as jest.Mock)
-      .mockReturnValueOnce('uuid-1')
-      .mockReturnValueOnce('uuid-2');
-    const key1 = buildKey('file.txt');
-    const key2 = buildKey('file.txt');
-    expect(key1).not.toBe(key2);
+  describe('uniqueness', () => {
+    it('produces different keys on each call due to different UUIDs', () => {
+      mockRandomUUID
+        .mockReturnValueOnce('uuid-1')
+        .mockReturnValueOnce('uuid-2');
+      expect(buildKey('photo.png')).not.toBe(buildKey('photo.png'));
+    });
   });
 });
