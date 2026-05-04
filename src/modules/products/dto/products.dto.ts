@@ -4,8 +4,11 @@ import {
   IsNumber,
   IsBoolean,
   IsArray,
+  IsEnum,
+  IsDateString,
 } from 'class-validator';
 import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { ProductStatus } from 'generated/prisma/enums';
 
 export class ProductImageDto {
   @ApiProperty({
@@ -93,7 +96,12 @@ export class ProductVariantDto {
 
   @ApiProperty({
     description: 'Product variant options',
-    example: 'Product variant options',
+    example: [
+      {
+        optionName: 'Color',
+        optionValue: 'Red',
+      },
+    ],
     type: [ProductVariantOptionDto],
   })
   @IsArray()
@@ -103,7 +111,7 @@ export class ProductVariantDto {
 
 export class UpdateProductVariantDto extends PartialType(ProductVariantDto) {}
 
-export class CreateProductDto {
+export class CreateProductBaseDto {
   @ApiProperty({
     description: 'Product name',
     example: 'Product name',
@@ -189,19 +197,11 @@ export class CreateProductDto {
 
   @ApiProperty({
     description: 'Product brand',
-    example: 'Product brand',
+    example: '1',
   })
   @IsString()
   @IsOptional()
   brandId: string;
-
-  @ApiProperty({
-    description: 'Product tags',
-    example: 'Product tags',
-  })
-  @IsString()
-  @IsOptional()
-  tags: string[];
 
   @ApiProperty({
     description: 'Product meta title',
@@ -221,11 +221,12 @@ export class CreateProductDto {
 
   @ApiProperty({
     description: 'Product status',
-    example: 'Product status',
+    enum: ProductStatus,
+    example: ProductStatus.DRAFT,
   })
-  @IsString()
+  @IsEnum(ProductStatus)
   @IsOptional()
-  status: string;
+  status: ProductStatus;
 
   @ApiProperty({
     description: 'Product is featured',
@@ -237,20 +238,31 @@ export class CreateProductDto {
 
   @ApiProperty({
     description: 'Product published at',
-    example: 'Product published at',
+    example: '2024-01-01T00:00:00.000Z',
   })
-  @IsString()
+  @IsDateString()
   @IsOptional()
   publishedAt: string;
 
   @ApiProperty({
     description: 'Product category id',
-    example: 'Product category id',
+    example: '1',
   })
   @IsString()
   @IsOptional()
   categoryId: string;
 
+  @ApiProperty({
+    description: 'Product tags',
+    example: ['electronics', 'sale'],
+    type: [String],
+  })
+  @IsArray()
+  @IsOptional()
+  tags!: string[];
+}
+
+export class CreateProductDto extends CreateProductBaseDto {
   @ApiProperty({
     description: 'Product images',
     example: [
@@ -264,7 +276,7 @@ export class CreateProductDto {
   })
   @IsArray()
   @IsOptional()
-  images: ProductImageDto[];
+  images!: ProductImageDto[];
 
   @ApiProperty({
     description: 'Product variants',
@@ -287,7 +299,7 @@ export class CreateProductDto {
   })
   @IsArray()
   @IsOptional()
-  variants: ProductVariantDto[];
+  variants!: ProductVariantDto[];
 }
 
-export class UpdateProductDto extends PartialType(CreateProductDto) {}
+export class UpdateProductDto extends PartialType(CreateProductBaseDto) {}

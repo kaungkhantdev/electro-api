@@ -10,6 +10,7 @@ import { randomUUID } from 'crypto';
 
 // Allowed folder name pattern — alphanumeric, hyphens, underscores, forward slash
 const SAFE_FOLDER_PATTERN = /^[a-zA-Z0-9_\-/]+$/;
+const APP_URL = process.env.APP_URL || 'http://localhost:8000';
 @Injectable()
 export class LocalStorageProvider implements IStorageProvider {
   private readonly basePath: string;
@@ -61,7 +62,7 @@ export class LocalStorageProvider implements IStorageProvider {
     const key = folder ? `${folder}/${filename}` : filename;
     return {
       key,
-      url: `/uploads/${key}`,
+      url: `${APP_URL}/uploads/${key}`,
       mimetype: file.mimetype,
       size: file.size,
     };
@@ -73,6 +74,6 @@ export class LocalStorageProvider implements IStorageProvider {
 
   getUrl(key: string): string {
     this.safePath(key);
-    return `/uploads/${key}`;
+    return `${APP_URL}/uploads/${key}`;
   }
 }

@@ -9,14 +9,13 @@ import {
   Query,
 } from '@nestjs/common';
 import { ProductService } from './products.service';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CursorPaginationDto } from 'src/common/dto/cursor-pagination.dto';
 import {
   CreateProductDto,
   UpdateProductDto,
   UpdateProductImageDto,
   UpdateProductVariantDto,
-  UpdateProductVariantOptionDto,
 } from './dto/products.dto';
 import { RolesGuard } from '@/common/guards/role.guard';
 import { UseGuards } from '@nestjs/common';
@@ -25,6 +24,7 @@ import { UserRole } from 'generated/prisma/enums';
 
 @Controller('admin/products')
 @UseGuards(RolesGuard)
+@ApiBearerAuth('JWT-auth')
 export class AdminProductController {
   constructor(private readonly productService: ProductService) {}
 
@@ -119,23 +119,6 @@ export class AdminProductController {
     @Body() data: UpdateProductImageDto,
   ) {
     return this.productService.updateProductImage(id, data);
-  }
-
-  @Put('/options/:id')
-  @Roles(UserRole.ADMIN)
-  @ApiOperation({
-    summary: 'Update a product variant option',
-    description: 'Updates a product variant option.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Product variant option updated successfully',
-  })
-  async updateProductOption(
-    @Param('id') id: string,
-    @Body() data: UpdateProductVariantOptionDto,
-  ) {
-    return this.productService.updateProductOption(id, data);
   }
 
   @Delete(':id')

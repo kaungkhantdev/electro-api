@@ -48,6 +48,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     details?: Record<string, unknown> | string[];
   } {
     if (exception instanceof Prisma.PrismaClientValidationError) {
+      console.error('Prisma validation error:', exception);
       return {
         status: HttpStatus.BAD_REQUEST,
         code: 'VALIDATION_ERROR',

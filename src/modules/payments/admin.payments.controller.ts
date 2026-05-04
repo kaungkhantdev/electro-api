@@ -4,6 +4,7 @@ import { RolesGuard } from '@/common/guards/role.guard';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { CursorPaginationDto } from '@/common/dto/cursor-pagination.dto';
 import {
+  ApiBearerAuth,
   ApiOperation,
   ApiResponse,
   ApiUnauthorizedResponse,
@@ -13,6 +14,7 @@ import { UserRole } from 'generated/prisma/enums';
 
 @Controller('admin/payments')
 @UseGuards(RolesGuard)
+@ApiBearerAuth('JWT-auth')
 export class AdminPaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 

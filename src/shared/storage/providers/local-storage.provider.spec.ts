@@ -9,6 +9,7 @@ jest.mock('crypto', () => ({
 }));
 
 const FAKE_BASE = '/fake/uploads';
+const APP_URL = 'http://localhost:8000';
 
 describe('LocalStorageProvider', () => {
   let provider: LocalStorageProvider;
@@ -48,7 +49,7 @@ describe('LocalStorageProvider', () => {
       );
       expect(result).toEqual({
         key: `${mockUUID}.png`,
-        url: `/uploads/${mockUUID}.png`,
+        url: `${APP_URL}/uploads/${mockUUID}.png`,
         mimetype: 'image/png',
         size: 1024,
       });
@@ -61,7 +62,7 @@ describe('LocalStorageProvider', () => {
         recursive: true,
       });
       expect(result.key).toBe(`images/${mockUUID}.png`);
-      expect(result.url).toBe(`/uploads/images/${mockUUID}.png`);
+      expect(result.url).toBe(`${APP_URL}/uploads/images/${mockUUID}.png`);
     });
 
     it('should return correct UploadResult shape', async () => {
@@ -85,7 +86,7 @@ describe('LocalStorageProvider', () => {
   describe('getUrl', () => {
     it('should return /uploads/ prefixed URL', () => {
       const url = provider.getUrl('images/file.png');
-      expect(url).toBe('/uploads/images/file.png');
+      expect(url).toBe(`${APP_URL}/uploads/images/file.png`);
     });
   });
 });

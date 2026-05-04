@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -8,12 +9,16 @@ import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { API_PREFIX, API_VERSION } from './common/constants/routes.constant';
 import { parseCorsOrigins } from './common/utils/parse-cors-origins.util';
+import * as path from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Cookie parser middleware
   app.use(cookieParser());
+
+  // Serve uploaded files
+  app.useStaticAssets(path.resolve('./uploads'), { prefix: '/uploads' });
 
   // Security headers
   app.use(helmet());
