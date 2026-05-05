@@ -53,7 +53,7 @@ async function main() {
     customers,
     products,
     addresses,
-    paymentMethods,
+    // paymentMethods,
   );
 
   await seedCartAndWishlist(prisma, customers, products);
